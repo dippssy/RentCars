@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Rent a car from LUXDRIVE. Easy booking, transparent pricing, and instant confirmation.">
+  <title>Rent a Car — LUXDRIVE</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar"><div class="flex items-center justify-between max-w-[1400px] mx-auto w-full">
+    <a href="index.html" class="text-2xl font-bold tracking-wider" style="font-family:'Manrope',sans-serif;">LUX<span style="color:var(--accent);">DRIVE</span></a>
+    <div class="nav-links hidden md:flex items-center gap-8">
+      <a href="index.html" class="nav-link">Home</a><a href="mobil.html" class="nav-link">Cars</a><a href="paket.html" class="nav-link">Packages</a><a href="testimoni.html" class="nav-link">Testimonials</a><a href="tentang.html" class="nav-link">About</a><a href="kontak.html" class="nav-link">Contact</a>
+      <button class="theme-toggle" aria-label="Toggle theme">☀️</button>
+      <a href="sewa.html" class="btn-primary text-sm !py-2 !px-5">Rent Now</a>
+    </div>
+    <div class="flex items-center gap-3 md:hidden"><button class="theme-toggle" aria-label="Toggle theme">☀️</button><button class="mobile-toggle">☰</button></div>
+  </div></nav>
+  <div class="mobile-menu"><button class="mobile-close">✕</button><a href="index.html" class="nav-link">Home</a><a href="mobil.html" class="nav-link">Cars</a><a href="paket.html" class="nav-link">Packages</a><a href="testimoni.html" class="nav-link">Testimonials</a><a href="tentang.html" class="nav-link">About</a><a href="kontak.html" class="nav-link">Contact</a><a href="login.html" class="nav-link">Login</a><a href="sewa.html" class="btn-primary mt-4">Rent Now</a></div>
+
+  <div class="page-header">
+    <p style="color:var(--accent);" class="font-semibold tracking-widest text-sm mb-3" data-aos="fade-up">BOOK YOUR RIDE</p>
+    <h1 class="section-title text-4xl md:text-5xl" data-aos="fade-up" data-aos-delay="100">Rent a <span style="color:var(--accent);">Car</span></h1>
+    <div class="accent-line mx-auto" data-aos="fade-up" data-aos-delay="150"></div>
+  </div>
+
+  <section class="section" style="padding-top:1rem;">
+    <div class="steps" data-aos="fade-up">
+      <div class="step active"><span class="step-number">1</span><span>Select Car</span></div>
+      <div class="step-line"></div>
+      <div class="step"><span class="step-number">2</span><span>Details</span></div>
+      <div class="step-line"></div>
+      <div class="step"><span class="step-number">3</span><span>Confirm</span></div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2">
+        <form onsubmit="event.preventDefault(); window.location.href='checkout.html';">
+          <div class="glass-strong p-8 mb-6" data-aos="fade-up">
+            <h3 class="text-lg font-bold mb-6">1. Choose Your Vehicle</h3>
+            <div class="form-group">
+              <label class="form-label" for="car-select">Select Car</label>
+              <select id="car-select" class="form-input" required>
+                <option value="">— Choose a car —</option>
+                <option value="avanza">Toyota Avanza — Rp 350,000/day</option>
+                <option value="innova">Toyota Innova — Rp 500,000/day</option>
+                <option value="fortuner">Toyota Fortuner — Rp 850,000/day</option>
+                <option value="pajero">Pajero Sport — Rp 900,000/day</option>
+                <option value="alphard">Toyota Alphard — Rp 1,500,000/day</option>
+                <option value="hiace">Toyota HiAce — Rp 1,200,000/day</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-group"><label class="form-label" for="start-date">Pickup Date</label><input type="date" id="start-date" class="form-input" required></div>
+              <div class="form-group"><label class="form-label" for="end-date">Return Date</label><input type="date" id="end-date" class="form-input" required></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-group"><label class="form-label" for="pickup-loc">Pickup Location</label><input type="text" id="pickup-loc" class="form-input" placeholder="e.g., Airport, Hotel address" required></div>
+              <div class="form-group"><label class="form-label" for="dropoff-loc">Return Location</label><input type="text" id="dropoff-loc" class="form-input" placeholder="Same as pickup or different"></div>
+            </div>
+          </div>
+
+          <div class="glass-strong p-8 mb-6" data-aos="fade-up">
+            <h3 class="text-lg font-bold mb-6">2. Additional Options</h3>
+            <div class="space-y-3">
+              <label class="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition" style="background:transparent;" onmouseover="this.style.background='var(--accent-subtle)'" onmouseout="this.style.background='transparent'">
+                <input type="checkbox" class="w-4 h-4"> <span>Include Driver (+Rp 150,000/day)</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition" style="background:transparent;" onmouseover="this.style.background='var(--accent-subtle)'" onmouseout="this.style.background='transparent'">
+                <input type="checkbox" class="w-4 h-4"> <span>Child Seat (+Rp 50,000/day)</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition" style="background:transparent;" onmouseover="this.style.background='var(--accent-subtle)'" onmouseout="this.style.background='transparent'">
+                <input type="checkbox" class="w-4 h-4"> <span>GPS Navigation (+Rp 30,000/day)</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition" style="background:transparent;" onmouseover="this.style.background='var(--accent-subtle)'" onmouseout="this.style.background='transparent'">
+                <input type="checkbox" class="w-4 h-4"> <span>Full Insurance Coverage (+Rp 75,000/day)</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="glass-strong p-8 mb-6" data-aos="fade-up">
+            <h3 class="text-lg font-bold mb-6">3. Special Requests</h3>
+            <div class="form-group"><label class="form-label" for="notes">Notes (optional)</label><textarea id="notes" class="form-input" rows="3" placeholder="Any special requests or notes..." style="resize:vertical;"></textarea></div>
+          </div>
+
+          <button type="submit" class="btn-primary w-full justify-center text-base py-4" data-aos="fade-up">Proceed to Checkout →</button>
+        </form>
+      </div>
+
+      <div>
+        <div class="glass-strong p-8 order-summary" data-aos="fade-left">
+          <h3 class="text-lg font-bold mb-6">Booking Summary</h3>
+          <div class="space-y-1">
+            <div class="summary-row"><span class="text-secondary">Vehicle</span><span id="summary-car">—</span></div>
+            <div class="summary-row"><span class="text-secondary">Duration</span><span id="rental-days">—</span></div>
+            <div class="summary-row"><span class="text-secondary">Pickup</span><span id="summary-pickup">—</span></div>
+          </div>
+          <div class="summary-total mt-4 pt-4" style="border-top:1px solid var(--border-subtle);">
+            <span>Estimated Total</span>
+            <span style="color:var(--accent);" id="rental-total">—</span>
+          </div>
+          <p class="text-secondary text-xs mt-4">* Final price calculated at checkout. Additional options not included in estimate.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-grid">
+      <div><h3 class="text-2xl font-bold mb-4" style="font-family:'Manrope',sans-serif;">LUX<span style="color:var(--accent);">DRIVE</span></h3><p class="text-secondary text-sm leading-relaxed">Your trusted premium car rental partner since 2014.</p></div>
+      <div><h4 class="footer-title">Quick Links</h4><a href="mobil.html" class="footer-link">Our Cars</a><a href="paket.html" class="footer-link">Packages</a><a href="sewa.html" class="footer-link">Rent a Car</a><a href="tentang.html" class="footer-link">About Us</a></div>
+      <div><h4 class="footer-title">Support</h4><a href="kontak.html" class="footer-link">Contact</a><a href="#" class="footer-link">FAQ</a><a href="#" class="footer-link">Terms & Conditions</a></div>
+      <div><h4 class="footer-title">Contact Info</h4><p class="text-secondary text-sm mb-2">📍 Jl. Sudirman No. 123, Jakarta</p><p class="text-secondary text-sm mb-2">📞 +62 812 3456 7890</p><p class="text-secondary text-sm">✉️ info@luxdrive.com</p></div>
+    </div>
+    <div class="footer-bottom"><p>© 2026 LUXDRIVE. All rights reserved.</p></div>
+  </footer>
+
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    const carSel = document.getElementById('car-select');
+    const sumCar = document.getElementById('summary-car');
+    if(carSel && sumCar) carSel.addEventListener('change', () => {
+      sumCar.textContent = carSel.options[carSel.selectedIndex].text.split('—')[0].trim() || '—';
+    });
+    const pickupInput = document.getElementById('pickup-loc');
+    const sumPickup = document.getElementById('summary-pickup');
+    if(pickupInput && sumPickup) pickupInput.addEventListener('input', () => {
+      sumPickup.textContent = pickupInput.value || '—';
+    });
+  </script>
+</body>
+</html>

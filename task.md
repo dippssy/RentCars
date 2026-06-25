@@ -1,0 +1,26 @@
+# LUXDRIVE Redesign — Task Tracker
+
+- [/] CSS Design System (style.css)
+  - [ ] Update Google Fonts (Manrope + Inter)
+  - [ ] Create dual-theme CSS variables (light + dark)
+  - [ ] Migrate accent color gold → silver
+  - [ ] Refine liquid glass styles
+  - [ ] Redesign buttons
+  - [ ] Update backgrounds with premium gradients
+  - [ ] Update typography scale
+  - [ ] Update all component styles for theme support
+- [ ] JavaScript (main.js)
+  - [ ] Add initThemeToggle() function
+  - [ ] Add theme persistence with localStorage
+- [ ] HTML Pages
+  - [ ] index.html (+ parallax asset update)
+  - [ ] mobil.html
+  - [ ] paket.html
+  - [ ] testimoni.html
+  - [ ] tentang.html
+  - [ ] kontak.html
+  - [ ] sewa.html
+  - [ ] login.html
+  - [ ] register.html
+  - [ ] checkout.html
+- [ ] Browser verification

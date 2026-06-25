@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Complete your LUXDRIVE car rental booking. Secure checkout with transparent pricing.">
+  <title>Checkout — LUXDRIVE</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar"><div class="flex items-center justify-between max-w-[1400px] mx-auto w-full">
+    <a href="index.html" class="text-2xl font-bold tracking-wider" style="font-family:'Manrope',sans-serif;">LUX<span style="color:var(--accent);">DRIVE</span></a>
+    <div class="nav-links hidden md:flex items-center gap-8">
+      <a href="index.html" class="nav-link">Home</a><a href="mobil.html" class="nav-link">Cars</a><a href="paket.html" class="nav-link">Packages</a><a href="testimoni.html" class="nav-link">Testimonials</a><a href="tentang.html" class="nav-link">About</a><a href="kontak.html" class="nav-link">Contact</a>
+      <button class="theme-toggle" aria-label="Toggle theme">☀️</button>
+      <a href="sewa.html" class="btn-primary text-sm !py-2 !px-5">Rent Now</a>
+    </div>
+    <div class="flex items-center gap-3 md:hidden"><button class="theme-toggle" aria-label="Toggle theme">☀️</button><button class="mobile-toggle">☰</button></div>
+  </div></nav>
+  <div class="mobile-menu"><button class="mobile-close">✕</button><a href="index.html" class="nav-link">Home</a><a href="mobil.html" class="nav-link">Cars</a><a href="paket.html" class="nav-link">Packages</a><a href="testimoni.html" class="nav-link">Testimonials</a><a href="tentang.html" class="nav-link">About</a><a href="kontak.html" class="nav-link">Contact</a><a href="login.html" class="nav-link">Login</a><a href="sewa.html" class="btn-primary mt-4">Rent Now</a></div>
+
+  <div class="page-header">
+    <p style="color:var(--accent);" class="font-semibold tracking-widest text-sm mb-3" data-aos="fade-up">SECURE CHECKOUT</p>
+    <h1 class="section-title text-4xl md:text-5xl" data-aos="fade-up" data-aos-delay="100">Complete Your <span style="color:var(--accent);">Booking</span></h1>
+    <div class="accent-line mx-auto" data-aos="fade-up" data-aos-delay="150"></div>
+  </div>
+
+  <section class="section" style="padding-top:1rem;">
+    <div class="steps mb-10" data-aos="fade-up">
+      <div class="step"><span class="step-number" style="border-color:var(--accent);color:var(--accent);">✓</span><span>Select Car</span></div>
+      <div class="step-line" style="background:var(--accent);"></div>
+      <div class="step active"><span class="step-number">2</span><span>Checkout</span></div>
+      <div class="step-line"></div>
+      <div class="step"><span class="step-number">3</span><span>Confirm</span></div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2">
+        <form onsubmit="event.preventDefault(); document.getElementById('success-modal').classList.remove('hidden');">
+          <div class="glass-strong p-8 mb-6" data-aos="fade-up">
+            <h3 class="text-lg font-bold mb-6">Personal Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-group"><label class="form-label" for="co-name">Full Name</label><input type="text" id="co-name" class="form-input" placeholder="John Doe" required></div>
+              <div class="form-group"><label class="form-label" for="co-email">Email</label><input type="email" id="co-email" class="form-input" placeholder="your@email.com" required></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-group"><label class="form-label" for="co-phone">Phone</label><input type="tel" id="co-phone" class="form-input" placeholder="+62 812 xxxx xxxx" required></div>
+              <div class="form-group"><label class="form-label" for="co-id">ID Number (KTP/SIM)</label><input type="text" id="co-id" class="form-input" placeholder="Enter your ID number" required></div>
+            </div>
+            <div class="form-group"><label class="form-label" for="co-address">Address</label><textarea id="co-address" class="form-input" rows="2" placeholder="Your current address" required style="resize:vertical;"></textarea></div>
+          </div>
+
+          <div class="glass-strong p-8 mb-6" data-aos="fade-up">
+            <h3 class="text-lg font-bold mb-6">Payment Method</h3>
+            <div class="space-y-3">
+              <label class="flex items-center gap-4 p-4 rounded-xl cursor-pointer transition" style="border:1px solid var(--glass-border);">
+                <input type="radio" name="payment" value="transfer" class="w-4 h-4" checked>
+                <div class="flex-1"><p class="font-semibold text-sm">Bank Transfer</p><p class="text-secondary text-xs">BCA, Mandiri, BNI, BRI</p></div>
+                <span class="text-secondary text-sm">🏦</span>
+              </label>
+              <label class="flex items-center gap-4 p-4 rounded-xl cursor-pointer transition" style="border:1px solid var(--glass-border);">
+                <input type="radio" name="payment" value="ewallet" class="w-4 h-4">
+                <div class="flex-1"><p class="font-semibold text-sm">E-Wallet</p><p class="text-secondary text-xs">GoPay, OVO, DANA, ShopeePay</p></div>
+                <span class="text-secondary text-sm">📱</span>
+              </label>
+              <label class="flex items-center gap-4 p-4 rounded-xl cursor-pointer transition" style="border:1px solid var(--glass-border);">
+                <input type="radio" name="payment" value="card" class="w-4 h-4">
+                <div class="flex-1"><p class="font-semibold text-sm">Credit / Debit Card</p><p class="text-secondary text-xs">Visa, Mastercard, JCB</p></div>
+                <span class="text-secondary text-sm">💳</span>
+              </label>
+              <label class="flex items-center gap-4 p-4 rounded-xl cursor-pointer transition" style="border:1px solid var(--glass-border);">
+                <input type="radio" name="payment" value="cash" class="w-4 h-4">
+                <div class="flex-1"><p class="font-semibold text-sm">Cash on Delivery</p><p class="text-secondary text-xs">Pay when the car is delivered</p></div>
+                <span class="text-secondary text-sm">💵</span>
+              </label>
+            </div>
+          </div>
+
+          <label class="flex items-start gap-2 mb-6 cursor-pointer" data-aos="fade-up">
+            <input type="checkbox" class="w-4 h-4 mt-0.5" required>
+            <span class="text-secondary text-sm">I agree to the <a href="#" style="color:var(--accent);" class="hover:underline">Rental Agreement</a>, <a href="#" style="color:var(--accent);" class="hover:underline">Terms & Conditions</a>, and <a href="#" style="color:var(--accent);" class="hover:underline">Cancellation Policy</a></span>
+          </label>
+
+          <button type="submit" class="btn-primary w-full justify-center text-base py-4" data-aos="fade-up">Confirm & Pay →</button>
+        </form>
+      </div>
+
+      <div>
+        <div class="glass-strong p-8 order-summary" data-aos="fade-left">
+          <h3 class="text-lg font-bold mb-6">Order Summary</h3>
+          <div class="flex items-center gap-4 mb-6 p-4 rounded-xl" style="background:var(--accent-subtle);">
+            <img src="download.jpg" alt="Car" class="w-20 h-14 object-cover rounded-lg">
+            <div><p class="font-semibold text-sm">Toyota Fortuner</p><p class="text-secondary text-xs">SUV • Automatic • 7 Seats</p></div>
+          </div>
+          <div class="space-y-1">
+            <div class="summary-row"><span class="text-secondary">Daily Rate</span><span>Rp 850,000</span></div>
+            <div class="summary-row"><span class="text-secondary">Duration</span><span>3 days</span></div>
+            <div class="summary-row"><span class="text-secondary">Subtotal</span><span>Rp 2,550,000</span></div>
+            <div class="summary-row"><span class="text-secondary">Insurance</span><span>Rp 225,000</span></div>
+            <div class="summary-row"><span class="text-secondary">Driver</span><span>Rp 450,000</span></div>
+            <div class="summary-row"><span class="text-secondary">Service Fee</span><span>Rp 50,000</span></div>
+          </div>
+          <div class="summary-total" style="border-top:1px solid var(--border-subtle);">
+            <span>Total</span>
+            <span class="text-xl" style="color:var(--text-primary);font-weight:800;">Rp 3,275,000</span>
+          </div>
+          <p class="text-secondary text-xs mt-4">* Price includes VAT. Fuel not included.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Success Modal -->
+  <div id="success-modal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);">
+    <div class="glass-strong p-10 max-w-md text-center" style="animation: heroFadeUp 0.5s ease forwards;">
+      <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style="background:rgba(34,197,94,0.15);">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <h2 class="text-2xl font-bold mb-2" style="font-family:'Manrope',sans-serif;">Booking <span style="color:var(--accent);">Confirmed!</span></h2>
+      <p class="text-secondary mb-2">Your booking has been successfully placed.</p>
+      <p class="text-secondary text-sm mb-6">Booking ID: <span style="color:var(--accent);font-family:monospace;font-weight:700;">LXD-2026-08471</span></p>
+      <p class="text-secondary text-sm mb-8">A confirmation email has been sent to your email address. Our team will contact you shortly.</p>
+      <a href="index.html" class="btn-primary justify-center">Back to Home</a>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-grid">
+      <div><h3 class="text-2xl font-bold mb-4" style="font-family:'Manrope',sans-serif;">LUX<span style="color:var(--accent);">DRIVE</span></h3><p class="text-secondary text-sm leading-relaxed">Your trusted premium car rental partner since 2014.</p></div>
+      <div><h4 class="footer-title">Quick Links</h4><a href="mobil.html" class="footer-link">Our Cars</a><a href="paket.html" class="footer-link">Packages</a><a href="sewa.html" class="footer-link">Rent a Car</a><a href="tentang.html" class="footer-link">About Us</a></div>
+      <div><h4 class="footer-title">Support</h4><a href="kontak.html" class="footer-link">Contact</a><a href="#" class="footer-link">FAQ</a><a href="#" class="footer-link">Terms & Conditions</a></div>
+      <div><h4 class="footer-title">Contact Info</h4><p class="text-secondary text-sm mb-2">📍 Jl. Sudirman No. 123, Jakarta</p><p class="text-secondary text-sm mb-2">📞 +62 812 3456 7890</p><p class="text-secondary text-sm">✉️ info@luxdrive.com</p></div>
+    </div>
+    <div class="footer-bottom"><p>© 2026 LUXDRIVE. All rights reserved.</p></div>
+  </footer>
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Browse LUXDRIVE's premium fleet of rental cars. SUVs, MPVs, Sedans, and luxury vehicles available for daily, weekly, and monthly rental.">
+  <title>Our Cars — LUXDRIVE</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar"><div class="flex items-center justify-between max-w-[1400px] mx-auto w-full">
+    <a href="index.html" class="text-2xl font-bold tracking-wider" style="font-family:'Manrope',sans-serif;">LUX<span style="color:var(--accent);">DRIVE</span></a>
+    <div class="nav-links hidden md:flex items-center gap-8">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="mobil.html" class="nav-link active-link">Cars</a>
+      <a href="paket.html" class="nav-link">Packages</a>
+      <a href="testimoni.html" class="nav-link">Testimonials</a>
+      <a href="tentang.html" class="nav-link">About</a>
+      <a href="kontak.html" class="nav-link">Contact</a>
+      <button class="theme-toggle" aria-label="Toggle theme">☀️</button>
+      <a href="sewa.html" class="btn-primary text-sm !py-2 !px-5">Rent Now</a>
+    </div>
+    <div class="flex items-center gap-3 md:hidden">
+      <button class="theme-toggle" aria-label="Toggle theme">☀️</button>
+      <button class="mobile-toggle">☰</button>
+    </div>
+  </div></nav>
+  <div class="mobile-menu"><button class="mobile-close">✕</button>
+    <a href="index.html" class="nav-link">Home</a><a href="mobil.html" class="nav-link">Cars</a><a href="paket.html" class="nav-link">Packages</a><a href="testimoni.html" class="nav-link">Testimonials</a><a href="tentang.html" class="nav-link">About</a><a href="kontak.html" class="nav-link">Contact</a><a href="login.html" class="nav-link">Login</a><a href="sewa.html" class="btn-primary mt-4">Rent Now</a>
+  </div>
+
+  <div class="page-header">
+    <p style="color:var(--accent);" class="font-semibold tracking-widest text-sm mb-3" data-aos="fade-up">OUR FLEET</p>
+    <h1 class="section-title text-4xl md:text-5xl" data-aos="fade-up" data-aos-delay="100">Explore Our <span style="color:var(--accent);">Cars</span></h1>
+    <div class="accent-line mx-auto" data-aos="fade-up" data-aos-delay="150"></div>
+    <p class="section-subtitle mx-auto" data-aos="fade-up" data-aos-delay="200">From family MPVs to premium SUVs — find the perfect car for your journey.</p>
+  </div>
+
+  <section class="section" style="padding-top:2rem;">
+    <div class="filter-tabs" data-aos="fade-up">
+      <button class="filter-tab active" data-filter="all">All Cars</button>
+      <button class="filter-tab" data-filter="mpv">MPV</button>
+      <button class="filter-tab" data-filter="suv">SUV</button>
+      <button class="filter-tab" data-filter="sedan">Sedan</button>
+      <button class="filter-tab" data-filter="luxury">Luxury</button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="glass-card car-card" data-category="mpv" data-aos="fade-up">
+        <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=600&h=400&fit=crop" alt="Toyota Avanza" loading="lazy">
+        <div class="car-card-body">
+          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Toyota Avanza</h3><p class="text-secondary text-sm">MPV • 7 Seats</p></div><span class="car-card-price">Rp 350K<small class="text-secondary font-normal">/day</small></span></div>
+          <div class="car-card-specs"><span>⛽ Petrol</span><span>⚙️ Automatic</span><span>❄️ AC</span></div>
+          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
+        </div>
+      </div>
+      <div class="glass-card car-card" data-category="mpv" data-aos="fade-up" data-aos-delay="100">
+        <img src="https://images.unsplash.com/photo-1606611013016-969c19ba27d5?w=600&h=400&fit=crop" alt="Toyota Innova" loading="lazy">
+        <div class="car-card-body">
+          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Toyota Innova</h3><p class="text-secondary text-sm">MPV • 8 Seats</p></div><span class="car-card-price">Rp 500K<small class="text-secondary font-normal">/day</small></span></div>
+          <div class="car-card-specs"><span>⛽ Diesel</span><span>⚙️ Automatic</span><span>❄️ AC</span></div>
+          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
+        </div>
+      </div>
+      <div class="glass-card car-card" data-category="suv" data-aos="fade-up" data-aos-delay="200">
+        <img src="download.jpg" alt="Toyota Fortuner" loading="lazy">
+        <div class="car-card-body">
+          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Toyota Fortuner</h3><p class="text-secondary text-sm">SUV • 7 Seats</p></div><span class="car-card-price">Rp 850K<small class="text-secondary font-normal">/day</small></span></div>
+          <div class="car-card-specs"><span>⛽ Diesel</span><span>⚙️ Automatic</span><span>❄️ AC</span></div>
+          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
+        </div>
+      </div>
+      <div class="glass-card car-card" data-category="suv" data-aos="fade-up">
+        <img src="https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=600&h=400&fit=crop" alt="Pajero Sport" loading="lazy">
+        <div class="car-card-body">
+          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Pajero Sport</h3><p class="text-secondary text-sm">SUV • 7 Seats</p></div><span class="car-card-price">Rp 900K<small class="text-secondary font-normal">/day</small></span></div>
+          <div class="car-card-specs"><span>⛽ Diesel</span><span>⚙️ Automatic</span><span>❄️ AC</span></div>
+          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
+        </div>
+      </div>
+      <div class="glass-card car-card" data-category="luxury" data-aos="fade-up" data-aos-delay="100">
+        <img src="https://images.unsplash.com/photo-1563720223185-11003d516935?w=600&h=400&fit=crop" alt="Toyota Alphard" loading="lazy">
+        <div class="car-card-body">
+          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Toyota Alphard</h3><p class="text-secondary text-sm">Luxury • 7 Seats</p></div><span class="car-card-price">Rp 1.5M<small class="text-secondary font-normal">/day</small></span></div>
+          <div class="car-card-specs"><span>⛽ Petrol</span><span>⚙️ Automatic</span><span>❄️ AC</span></div>
+          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
+        </div>
+      </div>
+      <div class="glass-card car-card" data-category="sedan" data-aos="fade-up" data-aos-delay="200">
+        <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&h=400&fit=crop" alt="Toyota Camry" loading="lazy">
+        <div class="car-card-body">
+          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Toyota Camry</h3><p class="text-secondary text-sm">Sedan • 5 Seats</p></div><span class="car-card-price">Rp 700K<small class="text-secondary font-normal">/day</small></span></div>
+          <div class="car-card-specs"><span>⛽ Petrol</span><span>⚙️ Automatic</span><span>❄️ AC</span></div>
+          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
+        </div>
+      </div>
+      <div class="glass-card car-card" data-category="luxury" data-aos="fade-up">
+        <img src="https://images.unsplash.com/photo-1570733577524-3a047079e80d?w=600&h=400&fit=crop" alt="Toyota HiAce" loading="lazy">
+        <div class="car-card-body">
+          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Toyota HiAce</h3><p class="text-secondary text-sm">Van • 15 Seats</p></div><span class="car-card-price">Rp 1.2M<small class="text-secondary font-normal">/day</small></span></div>
+          <div class="car-card-specs"><span>⛽ Diesel</span><span>⚙️ Manual</span><span>❄️ AC</span></div>
+          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
+        </div>
+      </div>
+      <div class="glass-card car-card" data-category="mpv" data-aos="fade-up" data-aos-delay="100">
+        <img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&h=400&fit=crop" alt="Honda BRV" loading="lazy">
+        <div class="car-card-body">
+          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Honda BR-V</h3><p class="text-secondary text-sm">MPV • 7 Seats</p></div><span class="car-card-price">Rp 400K<small class="text-secondary font-normal">/day</small></span></div>
+          <div class="car-card-specs"><span>⛽ Petrol</span><span>⚙️ CVT</span><span>❄️ AC</span></div>
+          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
+        </div>
+      </div>
+      <div class="glass-card car-card" data-category="sedan" data-aos="fade-up" data-aos-delay="200">
+        <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&h=400&fit=crop" alt="Honda Civic" loading="lazy">
+        <div class="car-card-body">
+          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Honda Civic</h3><p class="text-secondary text-sm">Sedan • 5 Seats</p></div><span class="car-card-price">Rp 600K<small class="text-secondary font-normal">/day</small></span></div>
+          <div class="car-card-specs"><span>⛽ Petrol</span><span>⚙️ CVT</span><span>❄️ AC</span></div>
+          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-grid">
+      <div><h3 class="text-2xl font-bold mb-4" style="font-family:'Manrope',sans-serif;">LUX<span style="color:var(--accent);">DRIVE</span></h3><p class="text-secondary text-sm leading-relaxed">Your trusted premium car rental partner since 2014.</p></div>
+      <div><h4 class="footer-title">Quick Links</h4><a href="mobil.html" class="footer-link">Our Cars</a><a href="paket.html" class="footer-link">Packages</a><a href="sewa.html" class="footer-link">Rent a Car</a><a href="tentang.html" class="footer-link">About Us</a></div>
+      <div><h4 class="footer-title">Support</h4><a href="kontak.html" class="footer-link">Contact</a><a href="#" class="footer-link">FAQ</a><a href="#" class="footer-link">Terms & Conditions</a><a href="#" class="footer-link">Privacy Policy</a></div>
+      <div><h4 class="footer-title">Contact Info</h4><p class="text-secondary text-sm mb-2">📍 Jl. Sudirman No. 123, Jakarta</p><p class="text-secondary text-sm mb-2">📞 +62 812 3456 7890</p><p class="text-secondary text-sm">✉️ info@luxdrive.com</p></div>
+    </div>
+    <div class="footer-bottom"><p>© 2026 LUXDRIVE. All rights reserved.</p></div>
+  </footer>
+
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
