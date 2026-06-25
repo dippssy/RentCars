@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html class="h-full bg-[#0a0c10]" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Fleet Management - LUXDRIVE</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            'brand-dark': '#0a0c10',
+            'card-dark': '#161b22',
+            'accent-blue': '#0095ff',
+            'text-muted': '#8b949e',
+            'border-gray': '#30363d',
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; color: #ffffff; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0c10; }
+    ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+    .card-border { border: 1px solid rgba(255, 255, 255, 0.05); }
+
+    /* Sidebar Transitions */
+    #sidebar { transition: width 0.3s ease; }
+    #sidebar .nav-text, #sidebar .logo-text, #sidebar .profile-text {
+      transition: opacity 0.2s ease, width 0.2s ease;
+      white-space: nowrap; overflow: hidden;
+    }
+    #sidebar.collapsed { width: 5rem; }
+    #sidebar.collapsed .nav-text, 
+    #sidebar.collapsed .logo-text,
+    #sidebar.collapsed .profile-text { opacity: 0; width: 0; display: none; }
+    #sidebar.collapsed .px-4 { padding-left: 0.5rem; padding-right: 0.5rem; justify-content: center; }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden">
+  <!-- Sidebar -->
+  <aside id="sidebar" class="w-64 flex-shrink-0 bg-[#0a0c10] border-r border-border-gray flex flex-col">
+    <div class="p-6 flex items-center justify-between">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <div class="w-8 h-8 flex-shrink-0 bg-accent-blue rounded-md flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"></path></svg>
+        </div>
+        <span class="logo-text text-xl font-bold tracking-tight uppercase">LUXDRIVE</span>
+      </div>
+      <button id="sidebar-toggle" class="text-text-muted hover:text-white transition p-1">
+        <svg id="toggle-icon" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg>
+      </button>
+    </div>
+    
+    <nav class="flex-1 px-4 space-y-2 mt-4">
+      <a href="index.html" class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors group" title="Dashboard">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+        <span class="nav-text font-medium">Dashboard</span>
+      </a>
+      <a href="fleet.html" class="flex items-center gap-3 px-4 py-3 text-white bg-accent-blue/10 border-r-2 border-accent-blue rounded-lg transition-colors group" title="Fleet Management">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+        <span class="nav-text">Fleet Management</span>
+      </a>
+      <a href="bookings.html" class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Bookings">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <span class="nav-text">Bookings</span>
+      </a>
+      <a href="customers.html" class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Customers">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        <span class="nav-text">Customers</span>
+      </a>
+    </nav>
+    <div class="p-6 border-t border-border-gray">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <img alt="User" class="w-10 h-10 rounded-full border border-border-gray object-cover flex-shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDL9pKOzcth9uGSqmK-tDbqNleWPY9SSKhLzPBCfQvtPUCBqlTCvmdQjldpeg7cZitCRRegVGfLJ4CrqJI8to5eYVTS7hvyHkPUDQJfZToqhu5YhQ9Nk_AthB5ag4O-PzM0w-S1NzIHTLQONmQ2uWjbUCGb7ABfnXLRiTU_dwMbgM63VPZ-S8V5m3SjTvcAXerEZoR8GfmCe5wC2HDe3_uHZIA6ER4x6QLfZBN9IAijC8PHZKmGhoOSjTlnPYd7VOuJYbeIHOzIn8Q"/>
+        <div class="profile-text flex-1 min-w-0"><p class="text-sm font-medium">Zola Zolatto</p></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    <header class="h-16 flex items-center justify-between px-8 bg-[#0a0c10]/80 backdrop-blur-sm sticky top-0 z-10 border-b border-border-gray">
+      <div class="flex-1 max-w-xl"><div class="relative"><span class="absolute inset-y-0 left-0 pl-3 flex items-center"><svg class="h-4 w-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></span><input class="block w-full bg-[#161b22] border-none text-sm rounded-full pl-10 pr-4 py-2 text-white" placeholder="Search fleet..." type="text"/></div></div>
+      <div class="flex items-center gap-6"><div class="flex items-center gap-2 cursor-pointer group"><img alt="User" class="w-8 h-8 rounded-full border border-border-gray" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlqQUZTOS7NnlBXvtfEYsjt6OBFYD_pER9LUUXMDBic55BqgRhMSMilqwTPxYBVgKD86EnkX26MRpwsTWAmBkY3d6bZurNft0C5TttFhr0H7SPAfHRqlRWzGm6GGrnTik4e6gEnmiBDee9ex-sJC14MMQrOEw5v-DjPh76kOjbSvlj2t6zGZDWWZYjOIYyAJY0ZPF89dlKuCRWh9ka80FLRiCWbuaQ0LQzZ16P-1605J8m4vzMNlUtfnTuJAUpVlzf3v8yydyielY"/><span class="text-sm font-medium">Admin Mode</span></div></div>
+    </header>
+
+    <div class="p-8 space-y-8">
+      <div class="flex justify-between items-center">
+        <h1 class="font-bold text-3xl">Fleet Management</h1>
+        <button id="btn-add-vehicle" class="px-4 py-2 bg-accent-blue hover:bg-blue-600 rounded-lg font-semibold transition-all flex items-center gap-2 text-sm shadow-[0_0_15px_rgba(0,149,255,0.3)]">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Add Vehicle
+        </button>
+      </div>
+
+      <!-- Filters & Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-card-dark p-6 rounded-2xl card-border">
+          <p class="text-text-muted text-sm mb-1">Total Vehicles</p><p class="text-2xl font-bold">155</p>
+        </div>
+        <div class="bg-card-dark p-6 rounded-2xl card-border">
+          <p class="text-text-muted text-sm mb-1">Available</p><p class="text-2xl font-bold text-cyan-400">42</p>
+        </div>
+        <div class="bg-card-dark p-6 rounded-2xl card-border">
+          <p class="text-text-muted text-sm mb-1">On Rent</p><p class="text-2xl font-bold text-accent-blue">110</p>
+        </div>
+        <div class="bg-card-dark p-6 rounded-2xl card-border">
+          <p class="text-text-muted text-sm mb-1">Maintenance</p><p class="text-2xl font-bold text-red-400">3</p>
+        </div>
+      </div>
+
+      <!-- Fleet Table -->
+      <div class="bg-card-dark rounded-2xl card-border overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="text-text-muted border-b border-border-gray text-sm">
+                <th class="px-6 py-4 font-medium">Vehicle</th>
+                <th class="px-6 py-4 font-medium">License Plate</th>
+                <th class="px-6 py-4 font-medium">Category</th>
+                <th class="px-6 py-4 font-medium">Daily Rate</th>
+                <th class="px-6 py-4 font-medium">Status</th>
+                <th class="px-6 py-4 font-medium text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="fleet-table-body" class="divide-y divide-border-gray text-sm">
+              <!-- Data will be loaded dynamically via Supabase -->
+              <tr>
+                <td colspan="6" class="px-6 py-8 text-center text-text-muted">
+                  <svg class="animate-spin h-5 w-5 mx-auto mb-2 text-accent-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading vehicles from Supabase...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="p-4 border-t border-border-gray flex justify-between items-center text-sm text-text-muted">
+          <span>Showing 1 to 4 of 155 entries</span>
+          <div class="flex gap-2">
+            <button class="px-3 py-1 bg-white/5 rounded hover:bg-white/10 transition">Previous</button>
+            <button class="px-3 py-1 bg-white/5 rounded hover:bg-white/10 transition">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Add Vehicle Modal -->
+    <div id="modal-add-vehicle" class="fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" id="modal-add-vehicle-bg"></div>
+      <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+        <div class="relative bg-card-dark rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg w-full card-border">
+          <form id="form-add-vehicle">
+            <div class="px-6 py-4 border-b border-border-gray flex justify-between items-center">
+              <h3 class="text-lg font-semibold text-white">Add New Vehicle</h3>
+              <button type="button" id="btn-close-vehicle" class="text-text-muted hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+            <div class="px-6 py-4 space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-text-muted mb-1">Vehicle Name</label>
+                <input type="text" id="v-name" required class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue focus:ring-1 focus:ring-accent-blue" placeholder="e.g. Toyota Fortuner">
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-text-muted mb-1">License Plate</label>
+                  <input type="text" id="v-plate" required class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue" placeholder="B 1234 ABC">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-text-muted mb-1">Category</label>
+                  <select id="v-category" required class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue">
+                    <option value="SUV">SUV</option>
+                    <option value="MPV">MPV</option>
+                    <option value="Sedan">Sedan</option>
+                    <option value="Luxury">Luxury</option>
+                    <option value="Luxury MPV">Luxury MPV</option>
+                  </select>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-text-muted mb-1">Daily Rate (Rp)</label>
+                  <input type="number" id="v-rate" required class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue" placeholder="850000">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-text-muted mb-1">Model Year</label>
+                  <input type="text" id="v-year" class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue" placeholder="2023 Model">
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-text-muted mb-1">Status</label>
+                <select id="v-status" class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue">
+                  <option value="Available">Available</option>
+                  <option value="On Rent">On Rent</option>
+                  <option value="Maintenance">Maintenance</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-text-muted mb-1">Upload Foto Mobil (Opsional)</label>
+                <input type="file" id="v-image-file" accept="image/*" class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue">
+              </div>
+            </div>
+            <div class="px-6 py-4 bg-[#0a0c10] border-t border-border-gray flex justify-end gap-3">
+              <button type="button" id="btn-cancel-vehicle" class="px-4 py-2 text-sm font-medium text-white bg-card-dark hover:bg-border-gray rounded-lg card-border transition-colors">Cancel</button>
+              <button type="submit" id="btn-submit-vehicle" class="px-4 py-2 text-sm font-medium text-white bg-accent-blue hover:bg-blue-600 rounded-lg transition-colors flex items-center gap-2">
+                Save Vehicle
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="../js/supabase-config.js"></script>
+  <script src="js/admin.js"></script>
+  <script>
+    // Format to IDR Currency
+    const formatIDR = (number) => {
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
+    };
+
+    // Helper to get status badge styling
+    const getStatusBadge = (status) => {
+      if(status === 'Available') return '<span class="px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded-full font-medium border border-green-500/20">Available</span>';
+      if(status === 'On Rent') return '<span class="px-2 py-1 bg-accent-blue/10 text-accent-blue text-xs rounded-full font-medium border border-accent-blue/20">On Rent</span>';
+      if(status === 'Maintenance') return '<span class="px-2 py-1 bg-red-500/10 text-red-400 text-xs rounded-full font-medium border border-red-500/20">Maintenance</span>';
+      return `<span class="px-2 py-1 bg-gray-500/10 text-gray-400 text-xs rounded-full font-medium border border-gray-500/20">${status}</span>`;
+    };
+
+    async function loadVehicles() {
+      const tbody = document.getElementById('fleet-table-body');
+      
+      try {
+        const { data: vehicles, error } = await supabaseClient
+          .from('vehicles')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!vehicles || vehicles.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-text-muted">No vehicles found in database.</td></tr>`;
+          return;
+        }
+
+        let html = '';
+        vehicles.forEach(car => {
+          let imageDisplay = car.image_url 
+            ? `<img src="${car.image_url}" alt="${car.name}" class="w-10 h-10 rounded-lg object-cover">`
+            : `<div class="w-10 h-10 rounded-lg bg-[#252833] flex items-center justify-center text-xl">${car.image_emoji || '🚘'}</div>`;
+
+          html += `
+            <tr class="hover:bg-white/5 transition-colors">
+              <td class="px-6 py-4 flex items-center gap-3">
+                ${imageDisplay}
+                <div><p class="font-semibold text-white">${car.name}</p><p class="text-xs text-text-muted">${car.model_year || 'Unknown Model'}</p></div>
+              </td>
+              <td class="px-6 py-4">${car.license_plate}</td>
+              <td class="px-6 py-4">${car.category}</td>
+              <td class="px-6 py-4">${formatIDR(car.daily_rate)}</td>
+              <td class="px-6 py-4">${getStatusBadge(car.status)}</td>
+              <td class="px-6 py-4 text-right">
+                <button class="text-text-muted hover:text-white p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
+              </td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = html;
+        
+      } catch (err) {
+        console.error("Error fetching vehicles:", err);
+        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-400">Error loading data: ${err.message}</td></tr>`;
+      }
+    }
+
+    // Load data when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      loadVehicles();
+
+      // Modal Logic
+      const modal = document.getElementById('modal-add-vehicle');
+      const btnAdd = document.getElementById('btn-add-vehicle');
+      const btnClose = document.getElementById('btn-close-vehicle');
+      const btnCancel = document.getElementById('btn-cancel-vehicle');
+      const bg = document.getElementById('modal-add-vehicle-bg');
+      const form = document.getElementById('form-add-vehicle');
+      const btnSubmit = document.getElementById('btn-submit-vehicle');
+
+      const closeModal = () => modal.classList.add('hidden');
+      const openModal = () => modal.classList.remove('hidden');
+
+      btnAdd.addEventListener('click', openModal);
+      btnClose.addEventListener('click', closeModal);
+      btnCancel.addEventListener('click', closeModal);
+      bg.addEventListener('click', closeModal);
+
+      // Form Submit Logic
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Change button state
+        const originalText = btnSubmit.innerHTML;
+        btnSubmit.innerHTML = `<svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...`;
+        btnSubmit.disabled = true;
+
+        try {
+          // 1. Logika Upload File
+          const fileInput = document.getElementById('v-image-file');
+          const file = fileInput.files[0];
+          let imageUrl = null;
+
+          if (file) {
+            const fileExt = file.name.split('.').pop();
+            const uniqueFileName = `${Date.now()}.${fileExt}`;
+
+            // Asumsi bucket bernama 'vehicles'
+            const { error: uploadError } = await supabaseClient.storage.from('vehicles').upload(uniqueFileName, file);
+            if (uploadError) throw new Error("Gagal mengunggah gambar mobil: " + uploadError.message);
+
+            // Dapatkan URL Publik
+            const { data: publicUrlData } = supabaseClient.storage.from('vehicles').getPublicUrl(uniqueFileName);
+            imageUrl = publicUrlData.publicUrl;
+          }
+
+          const newVehicle = {
+            name: document.getElementById('v-name').value,
+            license_plate: document.getElementById('v-plate').value,
+            category: document.getElementById('v-category').value,
+            daily_rate: parseInt(document.getElementById('v-rate').value),
+            model_year: document.getElementById('v-year').value,
+            status: document.getElementById('v-status').value,
+            image_emoji: document.getElementById('v-category').value.includes('Luxury') ? '🏎️' : '🚘',
+            image_url: imageUrl
+          };
+
+          const { error } = await supabaseClient.from('vehicles').insert([newVehicle]);
+          if (error) throw error;
+          
+          form.reset();
+          closeModal();
+          // Reload the table
+          loadVehicles();
+        } catch (error) {
+          alert("Error: " + error.message);
+        } finally {
+          btnSubmit.innerHTML = originalText;
+          btnSubmit.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

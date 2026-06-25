@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="h-full bg-[#0a0c10]" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>LUXDRIVE Admin Dashboard</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            'brand-dark': '#0a0c10',
+            'card-dark': '#161b22',
+            'accent-blue': '#0095ff',
+            'text-muted': '#8b949e',
+            'border-gray': '#30363d',
+          },
+        },
+      },
+    }
+  </script>
+  <style data-purpose="custom-layout">
+    body {
+      font-family: 'Inter', sans-serif;
+      color: #ffffff;
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0c10; }
+    ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+
+    .glow-blue { box-shadow: 0 0 15px rgba(0, 149, 255, 0.4); }
+    .glow-ai {
+      box-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
+      background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+    }
+    .card-border { border: 1px solid rgba(255, 255, 255, 0.05); }
+
+    /* Sidebar Transitions */
+    #sidebar { transition: width 0.3s ease; }
+    #sidebar .nav-text, #sidebar .logo-text, #sidebar .profile-text {
+      transition: opacity 0.2s ease, width 0.2s ease;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    
+    /* Collapsed State */
+    #sidebar.collapsed { width: 5rem; }
+    #sidebar.collapsed .nav-text, 
+    #sidebar.collapsed .logo-text,
+    #sidebar.collapsed .profile-text {
+      opacity: 0;
+      width: 0;
+      display: none;
+    }
+    #sidebar.collapsed .px-4 { padding-left: 0.5rem; padding-right: 0.5rem; justify-content: center; }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden">
+
+  <!-- BEGIN: Sidebar -->
+  <aside id="sidebar" class="w-64 flex-shrink-0 bg-[#0a0c10] border-r border-border-gray flex flex-col" data-purpose="sidebar">
+    <!-- Logo Section -->
+    <div class="p-6 flex items-center justify-between">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <div class="w-8 h-8 flex-shrink-0 bg-accent-blue rounded-md flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"></path></svg>
+        </div>
+        <span class="logo-text text-xl font-bold tracking-tight uppercase">LUXDRIVE</span>
+      </div>
+      <button id="sidebar-toggle" class="text-text-muted hover:text-white transition p-1">
+        <svg id="toggle-icon" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg>
+      </button>
+    </div>
+    
+    <!-- Navigation Menu -->
+    <nav class="flex-1 px-4 space-y-2 mt-4">
+      <a href="index.html" class="flex items-center gap-3 px-4 py-3 text-white bg-accent-blue/10 border-r-2 border-accent-blue rounded-lg transition-colors group" title="Dashboard">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+        <span class="nav-text font-medium">Dashboard</span>
+      </a>
+      <a href="fleet.html" class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Fleet Management">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+        <span class="nav-text">Fleet Management</span>
+      </a>
+      <a href="bookings.html" class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Bookings">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <span class="nav-text">Bookings</span>
+      </a>
+      <a href="customers.html" class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Customers">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        <span class="nav-text">Customers</span>
+      </a>
+      <a href="#" class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Analytics">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+        <span class="nav-text">Analytics</span>
+      </a>
+    </nav>
+    
+    <!-- Footer Profile -->
+    <div class="p-6 border-t border-border-gray">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <img alt="Zola Zolatto" class="w-10 h-10 rounded-full border border-border-gray object-cover bg-gray-700 flex-shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDL9pKOzcth9uGSqmK-tDbqNleWPY9SSKhLzPBCfQvtPUCBqlTCvmdQjldpeg7cZitCRRegVGfLJ4CrqJI8to5eYVTS7hvyHkPUDQJfZToqhu5YhQ9Nk_AthB5ag4O-PzM0w-S1NzIHTLQONmQ2uWjbUCGb7ABfnXLRiTU_dwMbgM63VPZ-S8V5m3SjTvcAXerEZoR8GfmCe5wC2HDe3_uHZIA6ER4x6QLfZBN9IAijC8PHZKmGhoOSjTlnPYd7VOuJYbeIHOzIn8Q"/>
+        <div class="profile-text flex-1 min-w-0">
+          <p class="text-sm font-medium truncate">Zola Zolatto</p>
+          <p class="text-xs text-text-muted truncate">zola@zolatto.com</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <!-- END: Sidebar -->
+
+  <!-- BEGIN: Main Content Area -->
+  <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    <!-- BEGIN: Top Navigation -->
+    <header class="h-16 flex items-center justify-between px-8 bg-[#0a0c10]/80 backdrop-blur-sm sticky top-0 z-10 border-b border-border-gray" data-purpose="top-nav">
+      <!-- Search -->
+      <div class="flex-1 max-w-xl">
+        <div class="relative group">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-4 w-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </span>
+          <input class="block w-full bg-[#161b22] border-none text-sm rounded-full pl-10 pr-4 py-2 text-white focus:ring-1 focus:ring-accent-blue transition-all" placeholder="Search" type="text"/>
+        </div>
+      </div>
+      <!-- Actions -->
+      <div class="flex items-center gap-6">
+        <button class="glow-ai flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 7.2L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"></path></svg>
+          Ask AI
+        </button>
+        <div class="flex items-center gap-4 border-l border-border-gray pl-6">
+          <button class="text-text-muted hover:text-white transition-colors relative">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+            <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-[#0a0c10]"></span>
+          </button>
+          <div class="flex items-center gap-2 cursor-pointer group">
+            <img alt="User" class="w-8 h-8 rounded-full border border-border-gray object-cover bg-gray-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlqQUZTOS7NnlBXvtfEYsjt6OBFYD_pER9LUUXMDBic55BqgRhMSMilqwTPxYBVgKD86EnkX26MRpwsTWAmBkY3d6bZurNft0C5TttFhr0H7SPAfHRqlRWzGm6GGrnTik4e6gEnmiBDee9ex-sJC14MMQrOEw5v-DjPh76kOjbSvlj2t6zGZDWWZYjOIYyAJY0ZPF89dlKuCRWh9ka80FLRiCWbuaQ0LQzZ16P-1605J8m4vzMNlUtfnTuJAUpVlzf3v8yydyielY"/>
+            <span class="text-sm font-medium">Pro Mode</span>
+            <svg class="w-4 h-4 text-text-muted group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- END: Top Navigation -->
+
+    <!-- Dashboard Content -->
+    <div class="p-8 space-y-8" data-purpose="dashboard-content">
+      <h1 class="font-bold text-4xl">Dashboard</h1>
+      
+      <!-- BEGIN: Metrics Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Total Revenue Card -->
+        <article class="bg-card-dark p-6 rounded-2xl card-border space-y-4" data-purpose="revenue-card">
+          <div class="flex justify-between items-start">
+            <h3 class="text-text-muted text-lg font-medium">Total Revenue</h3>
+            <span class="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded bg-teal-500/10 text-teal-400">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"></path></svg>
+              +12%
+            </span>
+          </div>
+          <div class="space-y-1">
+            <p id="total-revenue-text" class="text-4xl font-bold">$12,450.00</p>
+          </div>
+          <div class="h-32 w-full relative">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </article>
+
+        <!-- Active Rentals Card -->
+        <article class="bg-card-dark p-6 rounded-2xl card-border space-y-6" data-purpose="rentals-card">
+          <div class="flex justify-between items-center">
+            <h3 class="text-text-muted text-lg font-medium">Active Rentals</h3>
+            <button class="text-text-muted hover:text-white">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle></svg>
+            </button>
+          </div>
+          <div class="flex items-center gap-8">
+            <div class="relative w-32 h-32 flex-shrink-0">
+               <canvas id="rentalsChart"></canvas>
+               <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                 <span class="text-xs text-text-muted">Total</span>
+                 <span id="total-vehicles-text" class="text-2xl font-bold">155</span>
+               </div>
+            </div>
+            <ul id="rentals-breakdown" class="space-y-4 flex-1">
+              <li class="flex items-center justify-between">
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-600"></span><span class="text-sm text-text-muted">SUV</span></div>
+                <span id="count-suv" class="text-sm font-semibold">65</span>
+              </li>
+              <li class="flex items-center justify-between">
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-cyan-400"></span><span class="text-sm text-text-muted">Sedan</span></div>
+                <span id="count-sedan" class="text-sm font-semibold">45</span>
+              </li>
+              <li class="flex items-center justify-between">
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-800"></span><span class="text-sm text-text-muted">Luxury</span></div>
+                <span id="count-luxury" class="text-sm font-semibold">25</span>
+              </li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Fleet Status Card -->
+        <article class="bg-card-dark p-6 rounded-2xl card-border space-y-6 flex flex-col" data-purpose="fleet-card">
+          <div class="flex justify-between items-center">
+            <h3 class="text-text-muted text-lg font-medium">Fleet Status</h3>
+            <select class="bg-border-gray border-none text-xs rounded-lg text-white pr-8 py-1">
+              <option>Last 6 months</option>
+            </select>
+          </div>
+          <div class="h-32 w-full flex-1 relative">
+             <canvas id="fleetChart"></canvas>
+          </div>
+        </article>
+      </div>
+      <!-- END: Metrics Grid -->
+
+      <!-- BEGIN: Bottom Section -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Recent Bookings Table -->
+        <div class="lg:col-span-2 bg-card-dark rounded-2xl card-border overflow-hidden" data-purpose="bookings-table">
+          <div class="p-6 flex justify-between items-center border-b border-border-gray">
+            <h3 class="text-xl font-semibold">Recent Bookings</h3>
+            <a href="bookings.html" class="text-sm text-accent-blue hover:underline">View All</a>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="text-text-muted border-b border-border-gray">
+                  <th class="px-6 py-4 font-medium text-sm">Vehicle & Customer</th>
+                  <th class="px-6 py-4 font-medium text-sm">Date</th>
+                  <th class="px-6 py-4 font-medium text-sm">Status</th>
+                </tr>
+              </thead>
+              <tbody id="recent-bookings-body" class="divide-y divide-border-gray">
+                <tr><td colspan="3" class="px-6 py-4 text-center text-text-muted">Loading bookings...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <aside class="bg-card-dark p-6 rounded-2xl card-border flex flex-col justify-center gap-6" data-purpose="quick-actions">
+          <h3 class="text-xl font-semibold">Quick Actions</h3>
+          <div class="space-y-4">
+            <button class="w-full py-4 bg-accent-blue hover:bg-blue-600 rounded-xl font-bold glow-blue transition-all flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+              Add New Car
+            </button>
+            <button class="w-full py-4 bg-white/5 hover:bg-white/10 rounded-xl font-bold transition-all flex items-center justify-center gap-2 card-border">
+              Create Reservation
+            </button>
+          </div>
+        </aside>
+      </div>
+      <!-- END: Bottom Section -->
+    </div>
+  </main>
+  <!-- END: Main Content Area -->
+  
+  <script src="../js/supabase-config.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

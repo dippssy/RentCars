@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html class="h-full bg-[#0a0c10]" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Customers - LUXDRIVE</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            'brand-dark': '#0a0c10',
+            'card-dark': '#161b22',
+            'accent-blue': '#0095ff',
+            'text-muted': '#8b949e',
+            'border-gray': '#30363d',
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; color: #ffffff; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0c10; }
+    ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+    .card-border { border: 1px solid rgba(255, 255, 255, 0.05); }
+
+    /* Sidebar Transitions */
+    #sidebar { transition: width 0.3s ease; }
+    #sidebar .nav-text, #sidebar .logo-text, #sidebar .profile-text {
+      transition: opacity 0.2s ease, width 0.2s ease;
+      white-space: nowrap; overflow: hidden;
+    }
+    #sidebar.collapsed { width: 5rem; }
+    #sidebar.collapsed .nav-text, 
+    #sidebar.collapsed .logo-text,
+    #sidebar.collapsed .profile-text { opacity: 0; width: 0; display: none; }
+    #sidebar.collapsed .px-4 { padding-left: 0.5rem; padding-right: 0.5rem; justify-content: center; }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden">
+  <!-- Sidebar -->
+  <aside id="sidebar" class="w-64 flex-shrink-0 bg-[#0a0c10] border-r border-border-gray flex flex-col">
+    <div class="p-6 flex items-center justify-between">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <div class="w-8 h-8 flex-shrink-0 bg-accent-blue rounded-md flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"></path></svg>
+        </div>
+        <span class="logo-text text-xl font-bold tracking-tight uppercase">LUXDRIVE</span>
+      </div>
+      <button id="sidebar-toggle" class="text-text-muted hover:text-white transition p-1">
+        <svg id="toggle-icon" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg>
+      </button>
+    </div>
+    
+    <nav class="flex-1 px-4 space-y-2 mt-4">
+      <a href="index.html" class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors group" title="Dashboard">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+        <span class="nav-text font-medium">Dashboard</span>
+      </a>
+      <a href="fleet.html" class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors group" title="Fleet Management">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+        <span class="nav-text">Fleet Management</span>
+      </a>
+      <a href="bookings.html" class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Bookings">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <span class="nav-text">Bookings</span>
+      </a>
+      <a href="customers.html" class="flex items-center gap-3 px-4 py-3 text-white bg-accent-blue/10 border-r-2 border-accent-blue rounded-lg transition-colors" title="Customers">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        <span class="nav-text">Customers</span>
+      </a>
+    </nav>
+    <div class="p-6 border-t border-border-gray">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <img alt="User" class="w-10 h-10 rounded-full border border-border-gray object-cover flex-shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDL9pKOzcth9uGSqmK-tDbqNleWPY9SSKhLzPBCfQvtPUCBqlTCvmdQjldpeg7cZitCRRegVGfLJ4CrqJI8to5eYVTS7hvyHkPUDQJfZToqhu5YhQ9Nk_AthB5ag4O-PzM0w-S1NzIHTLQONmQ2uWjbUCGb7ABfnXLRiTU_dwMbgM63VPZ-S8V5m3SjTvcAXerEZoR8GfmCe5wC2HDe3_uHZIA6ER4x6QLfZBN9IAijC8PHZKmGhoOSjTlnPYd7VOuJYbeIHOzIn8Q"/>
+        <div class="profile-text flex-1 min-w-0"><p class="text-sm font-medium">Zola Zolatto</p></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    <header class="h-16 flex items-center justify-between px-8 bg-[#0a0c10]/80 backdrop-blur-sm sticky top-0 z-10 border-b border-border-gray">
+      <div class="flex-1 max-w-xl"><div class="relative"><span class="absolute inset-y-0 left-0 pl-3 flex items-center"><svg class="h-4 w-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></span><input class="block w-full bg-[#161b22] border-none text-sm rounded-full pl-10 pr-4 py-2 text-white" placeholder="Search customers..." type="text"/></div></div>
+      <div class="flex items-center gap-6"><div class="flex items-center gap-2 cursor-pointer group"><img alt="User" class="w-8 h-8 rounded-full border border-border-gray" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlqQUZTOS7NnlBXvtfEYsjt6OBFYD_pER9LUUXMDBic55BqgRhMSMilqwTPxYBVgKD86EnkX26MRpwsTWAmBkY3d6bZurNft0C5TttFhr0H7SPAfHRqlRWzGm6GGrnTik4e6gEnmiBDee9ex-sJC14MMQrOEw5v-DjPh76kOjbSvlj2t6zGZDWWZYjOIYyAJY0ZPF89dlKuCRWh9ka80FLRiCWbuaQ0LQzZ16P-1605J8m4vzMNlUtfnTuJAUpVlzf3v8yydyielY"/><span class="text-sm font-medium">Admin Mode</span></div></div>
+    </header>
+
+    <div class="p-8 space-y-8">
+      <div class="flex justify-between items-center">
+        <h1 class="font-bold text-3xl">Customers</h1>
+        <button id="btn-add-customer" class="px-4 py-2 bg-white hover:bg-gray-200 text-black rounded-lg font-semibold transition-all flex items-center gap-2 text-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Add Customer
+        </button>
+      </div>
+
+      <!-- Customers Table -->
+      <div class="bg-card-dark rounded-2xl card-border overflow-hidden">
+        <div class="p-6 border-b border-border-gray flex justify-between items-center">
+          <h3 class="text-xl font-semibold">Customer Directory</h3>
+          <button class="text-text-muted hover:text-white">Export CSV</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="text-text-muted border-b border-border-gray text-sm">
+                <th class="px-6 py-4 font-medium">Customer</th>
+                <th class="px-6 py-4 font-medium">Contact</th>
+                <th class="px-6 py-4 font-medium">Total Rentals</th>
+                <th class="px-6 py-4 font-medium">Total Spent</th>
+                <th class="px-6 py-4 font-medium">Status</th>
+                <th class="px-6 py-4 font-medium text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="customers-table-body" class="divide-y divide-border-gray text-sm">
+              <tr>
+                <td colspan="6" class="px-6 py-8 text-center text-text-muted">
+                  <svg class="animate-spin h-5 w-5 mx-auto mb-2 text-accent-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading customers from Supabase...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="p-4 border-t border-border-gray flex justify-between items-center text-sm text-text-muted">
+          <span>Showing 1 to 3 of 1,240 entries</span>
+          <div class="flex gap-2">
+            <button class="px-3 py-1 bg-white/5 rounded hover:bg-white/10 transition">Previous</button>
+            <button class="px-3 py-1 bg-white/5 rounded hover:bg-white/10 transition">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Add Customer Modal -->
+    <div id="modal-add-customer" class="fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" id="modal-add-customer-bg"></div>
+      <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+        <div class="relative bg-card-dark rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg w-full card-border">
+          <form id="form-add-customer">
+            <div class="px-6 py-4 border-b border-border-gray flex justify-between items-center">
+              <h3 class="text-lg font-semibold text-white">Add New Customer</h3>
+              <button type="button" id="btn-close-customer" class="text-text-muted hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+            <div class="px-6 py-4 space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-text-muted mb-1">Full Name</label>
+                <input type="text" id="c-name" required class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue" placeholder="e.g. John Doe">
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-text-muted mb-1">Email</label>
+                  <input type="email" id="c-email" required class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue" placeholder="john@example.com">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-text-muted mb-1">Phone</label>
+                  <input type="text" id="c-phone" required class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue" placeholder="+62 812 3456">
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-text-muted mb-1">Upload Foto Profil (Opsional)</label>
+                <input type="file" id="c-avatar-file" accept="image/*" class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue">
+              </div>
+            </div>
+            <div class="px-6 py-4 bg-[#0a0c10] border-t border-border-gray flex justify-end gap-3">
+              <button type="button" id="btn-cancel-customer" class="px-4 py-2 text-sm font-medium text-white bg-card-dark hover:bg-border-gray rounded-lg card-border transition-colors">Cancel</button>
+              <button type="submit" id="btn-submit-customer" class="px-4 py-2 text-sm font-medium text-black bg-white hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-2">
+                Save Customer
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="../js/supabase-config.js"></script>
+  <script src="js/admin.js"></script>
+  <script>
+    const formatIDR = (number) => {
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
+    };
+
+    const getStatusBadge = (status) => {
+      if(status === 'Verified') return '<span class="px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded-full font-medium border border-green-500/20">Verified</span>';
+      if(status === 'Pending') return '<span class="px-2 py-1 bg-yellow-500/10 text-yellow-400 text-xs rounded-full font-medium border border-yellow-500/20">Pending</span>';
+      return `<span class="px-2 py-1 bg-gray-500/10 text-gray-400 text-xs rounded-full font-medium border border-gray-500/20">${status}</span>`;
+    };
+
+    async function loadCustomers() {
+      const tbody = document.getElementById('customers-table-body');
+      
+      try {
+        const { data: customers, error } = await supabaseClient
+          .from('customers')
+          .select('*')
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+
+        if (!customers || customers.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-text-muted">No customers found in database.</td></tr>`;
+          return;
+        }
+
+        let html = '';
+        customers.forEach(c => {
+          html += `
+            <tr class="hover:bg-white/5 transition-colors">
+              <td class="px-6 py-4 flex items-center gap-3">
+                <img src="${c.avatar_url || 'https://i.pravatar.cc/150'}" alt="${c.full_name}" class="w-10 h-10 rounded-full border border-border-gray object-cover">
+                <div>
+                  <p class="font-semibold text-white">${c.full_name}</p>
+                  <p class="text-xs text-text-muted">Joined ${c.join_date}</p>
+                </div>
+              </td>
+              <td class="px-6 py-4"><p>${c.email}</p><p class="text-xs text-text-muted">${c.phone}</p></td>
+              <td class="px-6 py-4">${c.total_rentals}</td>
+              <td class="px-6 py-4">${formatIDR(c.total_spent)}</td>
+              <td class="px-6 py-4">${getStatusBadge(c.status)}</td>
+              <td class="px-6 py-4 text-right">
+                <button class="text-text-muted hover:text-white p-1">...</button>
+              </td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = html;
+        
+      } catch (err) {
+        console.error("Error fetching customers:", err);
+        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-400">Error loading data: ${err.message}</td></tr>`;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCustomers();
+
+      // Modal Logic
+      const modal = document.getElementById('modal-add-customer');
+      const btnAdd = document.getElementById('btn-add-customer');
+      const btnClose = document.getElementById('btn-close-customer');
+      const btnCancel = document.getElementById('btn-cancel-customer');
+      const bg = document.getElementById('modal-add-customer-bg');
+      const form = document.getElementById('form-add-customer');
+      const btnSubmit = document.getElementById('btn-submit-customer');
+
+      const closeModal = () => modal.classList.add('hidden');
+      const openModal = () => modal.classList.remove('hidden');
+
+      btnAdd.addEventListener('click', openModal);
+      btnClose.addEventListener('click', closeModal);
+      btnCancel.addEventListener('click', closeModal);
+      bg.addEventListener('click', closeModal);
+
+      // Form Submit Logic
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const originalText = btnSubmit.innerHTML;
+        btnSubmit.innerHTML = `<svg class="animate-spin h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...`;
+        btnSubmit.disabled = true;
+
+        try {
+          // 1. Logika Upload File
+          const fileInput = document.getElementById('c-avatar-file');
+          const file = fileInput.files[0];
+          let avatarUrl = `https://i.pravatar.cc/150?u=${Math.random()}`; // URL Default
+
+          if (file) {
+            const fileExt = file.name.split('.').pop();
+            const uniqueFileName = `${Date.now()}.${fileExt}`;
+
+            // Asumsi bucket bernama 'avatars'
+            const { error: uploadError } = await supabaseClient.storage.from('avatars').upload(uniqueFileName, file);
+            if (uploadError) throw new Error("Gagal mengunggah gambar: " + uploadError.message);
+
+            // Dapatkan URL Publik
+            const { data: publicUrlData } = supabaseClient.storage.from('avatars').getPublicUrl(uniqueFileName);
+            avatarUrl = publicUrlData.publicUrl;
+          }
+
+          // 2. Logika Menyimpan ke Database
+          const date = new Date();
+          const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+          const joinDateStr = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+
+          const newCustomer = {
+            full_name: document.getElementById('c-name').value,
+            email: document.getElementById('c-email').value,
+            phone: document.getElementById('c-phone').value,
+            avatar_url: avatarUrl, // Menggunakan URL hasil upload (atau default)
+            join_date: joinDateStr,
+            status: 'Verified',
+            total_rentals: 0,
+            total_spent: 0
+          };
+
+          const { error } = await supabaseClient.from('customers').insert([newCustomer]);
+          if (error) throw error;
+          
+          form.reset();
+          closeModal();
+          loadCustomers();
+        } catch (error) {
+          alert("Error: " + error.message);
+        } finally {
+          btnSubmit.innerHTML = originalText;
+          btnSubmit.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
