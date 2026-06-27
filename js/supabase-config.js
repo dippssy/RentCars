@@ -4,3 +4,19 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 // Initialize Supabase Client
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+// Auth Helper: Check if user is logged in, redirect to login if not
+async function checkAdminAuth() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) {
+    window.location.href = 'login.html';
+    return null;
+  }
+  return session.user;
+}
+
+// Auth Helper: Logout
+async function adminLogout() {
+  await supabaseClient.auth.signOut();
+  window.location.href = 'login.html';
+}

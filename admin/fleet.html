@@ -4,11 +4,9 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>Fleet Management - LUXDRIVE</title>
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     tailwind.config = {
@@ -35,18 +33,26 @@
 
     /* Sidebar Transitions */
     #sidebar { transition: width 0.3s ease; }
-    #sidebar .nav-text, #sidebar .logo-text, #sidebar .profile-text {
-      transition: opacity 0.2s ease, width 0.2s ease;
-      white-space: nowrap; overflow: hidden;
-    }
+    #sidebar .nav-text, #sidebar .logo-text, #sidebar .profile-text { transition: opacity 0.2s ease, width 0.2s ease; white-space: nowrap; overflow: hidden; }
     #sidebar.collapsed { width: 5rem; }
-    #sidebar.collapsed .nav-text, 
-    #sidebar.collapsed .logo-text,
-    #sidebar.collapsed .profile-text { opacity: 0; width: 0; display: none; }
+    #sidebar.collapsed .nav-text, #sidebar.collapsed .logo-text, #sidebar.collapsed .profile-text { opacity: 0; width: 0; display: none; }
     #sidebar.collapsed .px-4 { padding-left: 0.5rem; padding-right: 0.5rem; justify-content: center; }
+
+    /* Mobile Responsive */
+    @media (max-width: 767px) {
+      #sidebar { position: fixed; left: -100%; top: 0; bottom: 0; z-index: 50; width: 280px !important; transition: left 0.3s ease; }
+      #sidebar.mobile-open { left: 0; }
+      #sidebar.collapsed { width: 280px !important; }
+      #sidebar.collapsed .nav-text, #sidebar.collapsed .logo-text, #sidebar.collapsed .profile-text { opacity: 1; width: auto; display: inline; }
+      #sidebar-toggle { display: none; }
+    }
   </style>
 </head>
 <body class="h-full flex overflow-hidden">
+  
+  <!-- Mobile Sidebar Overlay -->
+  <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"></div>
+
   <!-- Sidebar -->
   <aside id="sidebar" class="w-64 flex-shrink-0 bg-[#0a0c10] border-r border-border-gray flex flex-col">
     <div class="p-6 flex items-center justify-between">
@@ -79,49 +85,64 @@
         <span class="nav-text">Customers</span>
       </a>
     </nav>
-    <div class="p-6 border-t border-border-gray">
-      <div class="flex items-center gap-3 overflow-hidden">
-        <img alt="User" class="w-10 h-10 rounded-full border border-border-gray object-cover flex-shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDL9pKOzcth9uGSqmK-tDbqNleWPY9SSKhLzPBCfQvtPUCBqlTCvmdQjldpeg7cZitCRRegVGfLJ4CrqJI8to5eYVTS7hvyHkPUDQJfZToqhu5YhQ9Nk_AthB5ag4O-PzM0w-S1NzIHTLQONmQ2uWjbUCGb7ABfnXLRiTU_dwMbgM63VPZ-S8V5m3SjTvcAXerEZoR8GfmCe5wC2HDe3_uHZIA6ER4x6QLfZBN9IAijC8PHZKmGhoOSjTlnPYd7VOuJYbeIHOzIn8Q"/>
-        <div class="profile-text flex-1 min-w-0"><p class="text-sm font-medium">Zola Zolatto</p></div>
-      </div>
+
+    <!-- Admin Profile + Logout -->
+    <div class="p-4 border-t border-border-gray space-y-3">
+      <a href="profile.html" class="flex items-center gap-3 overflow-hidden px-2 hover:bg-white/5 p-2 rounded-lg transition-colors group cursor-pointer">
+        <div class="w-9 h-9 rounded-full bg-accent-blue/20 flex items-center justify-center flex-shrink-0 group-hover:bg-accent-blue/30 transition">
+          <svg class="w-5 h-5 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+        </div>
+        <div class="profile-text flex-1 min-w-0">
+          <p id="admin-name" class="text-sm font-medium truncate group-hover:text-white transition-colors">Admin</p>
+          <p id="admin-email" class="text-xs text-text-muted truncate">admin@luxdrive.com</p>
+        </div>
+      </a>
+      <button id="btn-logout" class="profile-text w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+        Logout
+      </button>
     </div>
   </aside>
 
   <!-- Main Content Area -->
   <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
-    <header class="h-16 flex items-center justify-between px-8 bg-[#0a0c10]/80 backdrop-blur-sm sticky top-0 z-10 border-b border-border-gray">
-      <div class="flex-1 max-w-xl"><div class="relative"><span class="absolute inset-y-0 left-0 pl-3 flex items-center"><svg class="h-4 w-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></span><input class="block w-full bg-[#161b22] border-none text-sm rounded-full pl-10 pr-4 py-2 text-white" placeholder="Search fleet..." type="text"/></div></div>
-      <div class="flex items-center gap-6"><div class="flex items-center gap-2 cursor-pointer group"><img alt="User" class="w-8 h-8 rounded-full border border-border-gray" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlqQUZTOS7NnlBXvtfEYsjt6OBFYD_pER9LUUXMDBic55BqgRhMSMilqwTPxYBVgKD86EnkX26MRpwsTWAmBkY3d6bZurNft0C5TttFhr0H7SPAfHRqlRWzGm6GGrnTik4e6gEnmiBDee9ex-sJC14MMQrOEw5v-DjPh76kOjbSvlj2t6zGZDWWZYjOIYyAJY0ZPF89dlKuCRWh9ka80FLRiCWbuaQ0LQzZ16P-1605J8m4vzMNlUtfnTuJAUpVlzf3v8yydyielY"/><span class="text-sm font-medium">Admin Mode</span></div></div>
+    <header class="h-14 md:h-16 flex items-center justify-between px-4 md:px-8 bg-[#0a0c10]/80 backdrop-blur-sm sticky top-0 z-10 border-b border-border-gray">
+      <!-- Mobile hamburger -->
+      <button id="mobile-menu-btn" class="md:hidden text-text-muted hover:text-white p-1">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+      </button>
+      <div class="flex-1 max-w-xl ml-3 md:ml-0"><div class="relative"><span class="absolute inset-y-0 left-0 pl-3 flex items-center"><svg class="h-4 w-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></span><input class="block w-full bg-[#161b22] border-none text-sm rounded-full pl-10 pr-4 py-2 text-white" placeholder="Search fleet..." type="text"/></div></div>
+      <div class="flex items-center gap-6 ml-4"><div class="flex items-center gap-2 cursor-pointer group"><span class="text-sm font-medium">Admin Mode</span></div></div>
     </header>
 
-    <div class="p-8 space-y-8">
+    <div class="p-4 md:p-8 space-y-6 md:space-y-8">
       <div class="flex justify-between items-center">
-        <h1 class="font-bold text-3xl">Fleet Management</h1>
-        <button id="btn-add-vehicle" class="px-4 py-2 bg-accent-blue hover:bg-blue-600 rounded-lg font-semibold transition-all flex items-center gap-2 text-sm shadow-[0_0_15px_rgba(0,149,255,0.3)]">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Add Vehicle
+        <h1 class="font-bold text-2xl md:text-3xl">Fleet Management</h1>
+        <button id="btn-add-vehicle" class="px-3 py-2 md:px-4 md:py-2 bg-accent-blue hover:bg-blue-600 rounded-lg font-semibold transition-all flex items-center gap-2 text-sm shadow-[0_0_15px_rgba(0,149,255,0.3)] whitespace-nowrap">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> <span class="hidden md:inline">Add Vehicle</span>
         </button>
       </div>
 
       <!-- Filters & Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-card-dark p-6 rounded-2xl card-border">
-          <p class="text-text-muted text-sm mb-1">Total Vehicles</p><p class="text-2xl font-bold">155</p>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        <div class="bg-card-dark p-4 md:p-6 rounded-2xl card-border">
+          <p class="text-text-muted text-xs md:text-sm mb-1">Total Vehicles</p><p id="stat-total" class="text-xl md:text-2xl font-bold">0</p>
         </div>
-        <div class="bg-card-dark p-6 rounded-2xl card-border">
-          <p class="text-text-muted text-sm mb-1">Available</p><p class="text-2xl font-bold text-cyan-400">42</p>
+        <div class="bg-card-dark p-4 md:p-6 rounded-2xl card-border">
+          <p class="text-text-muted text-xs md:text-sm mb-1">Available</p><p id="stat-avail" class="text-xl md:text-2xl font-bold text-cyan-400">0</p>
         </div>
-        <div class="bg-card-dark p-6 rounded-2xl card-border">
-          <p class="text-text-muted text-sm mb-1">On Rent</p><p class="text-2xl font-bold text-accent-blue">110</p>
+        <div class="bg-card-dark p-4 md:p-6 rounded-2xl card-border">
+          <p class="text-text-muted text-xs md:text-sm mb-1">On Rent</p><p id="stat-rent" class="text-xl md:text-2xl font-bold text-accent-blue">0</p>
         </div>
-        <div class="bg-card-dark p-6 rounded-2xl card-border">
-          <p class="text-text-muted text-sm mb-1">Maintenance</p><p class="text-2xl font-bold text-red-400">3</p>
+        <div class="bg-card-dark p-4 md:p-6 rounded-2xl card-border">
+          <p class="text-text-muted text-xs md:text-sm mb-1">Maintenance</p><p id="stat-maint" class="text-xl md:text-2xl font-bold text-red-400">0</p>
         </div>
       </div>
 
       <!-- Fleet Table -->
       <div class="bg-card-dark rounded-2xl card-border overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full text-left">
+          <table class="w-full text-left min-w-[800px]">
             <thead>
               <tr class="text-text-muted border-b border-border-gray text-sm">
                 <th class="px-6 py-4 font-medium">Vehicle</th>
@@ -133,25 +154,14 @@
               </tr>
             </thead>
             <tbody id="fleet-table-body" class="divide-y divide-border-gray text-sm">
-              <!-- Data will be loaded dynamically via Supabase -->
               <tr>
                 <td colspan="6" class="px-6 py-8 text-center text-text-muted">
-                  <svg class="animate-spin h-5 w-5 mx-auto mb-2 text-accent-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
+                  <svg class="animate-spin h-5 w-5 mx-auto mb-2 text-accent-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                   Loading vehicles from Supabase...
                 </td>
               </tr>
             </tbody>
           </table>
-        </div>
-        <div class="p-4 border-t border-border-gray flex justify-between items-center text-sm text-text-muted">
-          <span>Showing 1 to 4 of 155 entries</span>
-          <div class="flex gap-2">
-            <button class="px-3 py-1 bg-white/5 rounded hover:bg-white/10 transition">Previous</button>
-            <button class="px-3 py-1 bg-white/5 rounded hover:bg-white/10 transition">Next</button>
-          </div>
         </div>
       </div>
     </div>
@@ -214,24 +224,97 @@
             </div>
             <div class="px-6 py-4 bg-[#0a0c10] border-t border-border-gray flex justify-end gap-3">
               <button type="button" id="btn-cancel-vehicle" class="px-4 py-2 text-sm font-medium text-white bg-card-dark hover:bg-border-gray rounded-lg card-border transition-colors">Cancel</button>
-              <button type="submit" id="btn-submit-vehicle" class="px-4 py-2 text-sm font-medium text-white bg-accent-blue hover:bg-blue-600 rounded-lg transition-colors flex items-center gap-2">
-                Save Vehicle
-              </button>
+              <button type="submit" id="btn-submit-vehicle" class="px-4 py-2 text-sm font-medium text-white bg-accent-blue hover:bg-blue-600 rounded-lg transition-colors flex items-center gap-2">Save Vehicle</button>
             </div>
           </form>
         </div>
       </div>
     </div>
+
+    <!-- Edit Vehicle Modal -->
+    <div id="modal-edit-vehicle" class="fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" id="modal-edit-vehicle-bg"></div>
+      <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+        <div class="relative bg-card-dark rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg w-full card-border">
+          <form id="form-edit-vehicle">
+            <input type="hidden" id="edit-v-id">
+            <div class="px-6 py-4 border-b border-border-gray flex justify-between items-center">
+              <h3 class="text-lg font-semibold text-white">Edit Vehicle</h3>
+              <button type="button" id="btn-close-edit-vehicle" class="text-text-muted hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+            <div class="px-6 py-4 space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-text-muted mb-1">Vehicle Name</label>
+                <input type="text" id="edit-v-name" required class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue focus:ring-1 focus:ring-accent-blue">
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-text-muted mb-1">License Plate</label>
+                  <input type="text" id="edit-v-plate" required class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-text-muted mb-1">Category</label>
+                  <select id="edit-v-category" required class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue">
+                    <option value="SUV">SUV</option>
+                    <option value="MPV">MPV</option>
+                    <option value="Sedan">Sedan</option>
+                    <option value="Luxury">Luxury</option>
+                    <option value="Luxury MPV">Luxury MPV</option>
+                  </select>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-text-muted mb-1">Daily Rate (Rp)</label>
+                  <input type="number" id="edit-v-rate" required class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-text-muted mb-1">Model Year</label>
+                  <input type="text" id="edit-v-year" class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue">
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-text-muted mb-1">Status</label>
+                <select id="edit-v-status" class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue">
+                  <option value="Available">Available</option>
+                  <option value="On Rent">On Rent</option>
+                  <option value="Maintenance">Maintenance</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-text-muted mb-1">Upload Foto Mobil Baru (Opsional)</label>
+                <input type="file" id="edit-v-image-file" accept="image/*" class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-3 py-2 text-white text-sm focus:border-accent-blue">
+                <p class="text-xs text-text-muted mt-1">Biarkan kosong jika tidak ingin mengubah foto.</p>
+              </div>
+            </div>
+            <div class="px-6 py-4 bg-[#0a0c10] border-t border-border-gray flex justify-end gap-3">
+              <button type="button" id="btn-cancel-edit-vehicle" class="px-4 py-2 text-sm font-medium text-white bg-card-dark hover:bg-border-gray rounded-lg card-border transition-colors">Cancel</button>
+              <button type="submit" id="btn-submit-edit-vehicle" class="px-4 py-2 text-sm font-medium text-white bg-accent-blue hover:bg-blue-600 rounded-lg transition-colors flex items-center gap-2">Update Vehicle</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div id="modal-lightbox" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/90 backdrop-blur-sm cursor-pointer" onclick="closeLightbox()"></div>
+      <div class="relative max-w-4xl w-full max-h-full flex flex-col items-center justify-center pointer-events-none">
+        <button onclick="closeLightbox()" class="absolute -top-12 right-0 text-white hover:text-gray-300 pointer-events-auto">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <img id="lightbox-img" src="" alt="Full image" class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl pointer-events-auto">
+      </div>
+    </div>
   </main>
+
   <script src="../js/supabase-config.js"></script>
   <script src="js/admin.js"></script>
   <script>
-    // Format to IDR Currency
-    const formatIDR = (number) => {
-      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
-    };
+    const formatIDR = (number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
 
-    // Helper to get status badge styling
     const getStatusBadge = (status) => {
       if(status === 'Available') return '<span class="px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded-full font-medium border border-green-500/20">Available</span>';
       if(status === 'On Rent') return '<span class="px-2 py-1 bg-accent-blue/10 text-accent-blue text-xs rounded-full font-medium border border-accent-blue/20">On Rent</span>';
@@ -239,101 +322,159 @@
       return `<span class="px-2 py-1 bg-gray-500/10 text-gray-400 text-xs rounded-full font-medium border border-gray-500/20">${status}</span>`;
     };
 
+    let allVehicles = [];
+
     async function loadVehicles() {
       const tbody = document.getElementById('fleet-table-body');
       
       try {
-        const { data: vehicles, error } = await supabaseClient
-          .from('vehicles')
-          .select('*')
-          .order('created_at', { ascending: false });
-
+        const { data: vehicles, error } = await supabaseClient.from('vehicles').select('*').order('created_at', { ascending: false });
         if (error) throw error;
+        
+        allVehicles = vehicles;
+        
+        // Update stats
+        document.getElementById('stat-total').textContent = vehicles.length;
+        document.getElementById('stat-avail').textContent = vehicles.filter(v => v.status === 'Available').length;
+        document.getElementById('stat-rent').textContent = vehicles.filter(v => v.status === 'On Rent').length;
+        document.getElementById('stat-maint').textContent = vehicles.filter(v => v.status === 'Maintenance').length;
 
         if (!vehicles || vehicles.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-text-muted">No vehicles found in database.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-text-muted">No vehicles found.</td></tr>`;
           return;
         }
 
         let html = '';
         vehicles.forEach(car => {
           let imageDisplay = car.image_url 
-            ? `<img src="${car.image_url}" alt="${car.name}" class="w-10 h-10 rounded-lg object-cover">`
+            ? `<img src="${car.image_url}" alt="${car.name}" class="w-10 h-10 rounded-lg object-cover cursor-pointer hover:opacity-80 transition" onclick="openLightbox('${car.image_url}')">`
             : `<div class="w-10 h-10 rounded-lg bg-[#252833] flex items-center justify-center text-xl">${car.image_emoji || '🚘'}</div>`;
 
           html += `
             <tr class="hover:bg-white/5 transition-colors">
-              <td class="px-6 py-4 flex items-center gap-3">
-                ${imageDisplay}
-                <div><p class="font-semibold text-white">${car.name}</p><p class="text-xs text-text-muted">${car.model_year || 'Unknown Model'}</p></div>
-              </td>
+              <td class="px-6 py-4 flex items-center gap-3">${imageDisplay}<div><p class="font-semibold text-white">${car.name}</p><p class="text-xs text-text-muted">${car.model_year || '-'}</p></div></td>
               <td class="px-6 py-4">${car.license_plate}</td>
               <td class="px-6 py-4">${car.category}</td>
               <td class="px-6 py-4">${formatIDR(car.daily_rate)}</td>
               <td class="px-6 py-4">${getStatusBadge(car.status)}</td>
               <td class="px-6 py-4 text-right">
-                <button class="text-text-muted hover:text-white p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
+                <div class="flex justify-end gap-2">
+                  <button onclick="editVehicle('${car.id}')" class="p-1.5 text-accent-blue bg-accent-blue/10 hover:bg-accent-blue/20 rounded-md transition-colors" title="Edit">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                  </button>
+                  <button onclick="deleteVehicle('${car.id}')" class="p-1.5 text-red-400 bg-red-500/10 hover:bg-red-500/20 rounded-md transition-colors" title="Delete">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  </button>
+                </div>
               </td>
             </tr>
           `;
         });
         tbody.innerHTML = html;
-        
       } catch (err) {
-        console.error("Error fetching vehicles:", err);
-        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-400">Error loading data: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-400">Error: ${err.message}</td></tr>`;
       }
     }
 
-    // Load data when page loads
+    // Delete Logic
+    window.deleteVehicle = async (id) => {
+      if (confirm('Are you sure you want to delete this vehicle?')) {
+        const { error } = await supabaseClient.from('vehicles').delete().eq('id', id);
+        if (error) alert("Error deleting vehicle: " + error.message);
+        else loadVehicles();
+      }
+    };
+
+    // Edit Logic
+    const editModal = document.getElementById('modal-edit-vehicle');
+    window.editVehicle = (id) => {
+      const car = allVehicles.find(v => v.id === id);
+      if(car) {
+        document.getElementById('edit-v-id').value = car.id;
+        document.getElementById('edit-v-name').value = car.name;
+        document.getElementById('edit-v-plate').value = car.license_plate;
+        document.getElementById('edit-v-category').value = car.category;
+        document.getElementById('edit-v-rate').value = car.daily_rate;
+        document.getElementById('edit-v-year').value = car.model_year || '';
+        document.getElementById('edit-v-status').value = car.status;
+        editModal.classList.remove('hidden');
+      }
+    };
+    document.getElementById('btn-close-edit-vehicle').addEventListener('click', () => editModal.classList.add('hidden'));
+    document.getElementById('btn-cancel-edit-vehicle').addEventListener('click', () => editModal.classList.add('hidden'));
+    document.getElementById('modal-edit-vehicle-bg').addEventListener('click', () => editModal.classList.add('hidden'));
+    
+    document.getElementById('form-edit-vehicle').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit-edit-vehicle');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = 'Updating...';
+      btn.disabled = true;
+
+      try {
+        const id = document.getElementById('edit-v-id').value;
+        const updates = {
+          name: document.getElementById('edit-v-name').value,
+          license_plate: document.getElementById('edit-v-plate').value,
+          category: document.getElementById('edit-v-category').value,
+          daily_rate: parseInt(document.getElementById('edit-v-rate').value),
+          model_year: document.getElementById('edit-v-year').value,
+          status: document.getElementById('edit-v-status').value
+        };
+
+        const fileInput = document.getElementById('edit-v-image-file');
+        const file = fileInput.files[0];
+        if (file) {
+          const fileExt = file.name.split('.').pop();
+          const uniqueFileName = `${Date.now()}.${fileExt}`;
+          const { error: uploadError } = await supabaseClient.storage.from('vehicles').upload(uniqueFileName, file);
+          if (uploadError) throw new Error("Gagal upload foto baru: " + uploadError.message);
+          const { data } = supabaseClient.storage.from('vehicles').getPublicUrl(uniqueFileName);
+          updates.image_url = data.publicUrl;
+        }
+
+        const { error } = await supabaseClient.from('vehicles').update(updates).eq('id', id);
+        if(error) throw new Error(error.message);
+        
+        editModal.classList.add('hidden'); 
+        document.getElementById('form-edit-vehicle').reset();
+        loadVehicles();
+      } catch (err) {
+        alert("Error updating: " + err.message);
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    });
+
+    // Add Vehicle Modal Logic
     document.addEventListener('DOMContentLoaded', () => {
       loadVehicles();
+      const addModal = document.getElementById('modal-add-vehicle');
+      document.getElementById('btn-add-vehicle').addEventListener('click', () => addModal.classList.remove('hidden'));
+      document.getElementById('btn-close-vehicle').addEventListener('click', () => addModal.classList.add('hidden'));
+      document.getElementById('btn-cancel-vehicle').addEventListener('click', () => addModal.classList.add('hidden'));
+      document.getElementById('modal-add-vehicle-bg').addEventListener('click', () => addModal.classList.add('hidden'));
 
-      // Modal Logic
-      const modal = document.getElementById('modal-add-vehicle');
-      const btnAdd = document.getElementById('btn-add-vehicle');
-      const btnClose = document.getElementById('btn-close-vehicle');
-      const btnCancel = document.getElementById('btn-cancel-vehicle');
-      const bg = document.getElementById('modal-add-vehicle-bg');
-      const form = document.getElementById('form-add-vehicle');
-      const btnSubmit = document.getElementById('btn-submit-vehicle');
-
-      const closeModal = () => modal.classList.add('hidden');
-      const openModal = () => modal.classList.remove('hidden');
-
-      btnAdd.addEventListener('click', openModal);
-      btnClose.addEventListener('click', closeModal);
-      btnCancel.addEventListener('click', closeModal);
-      bg.addEventListener('click', closeModal);
-
-      // Form Submit Logic
-      form.addEventListener('submit', async (e) => {
+      document.getElementById('form-add-vehicle').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        // Change button state
-        const originalText = btnSubmit.innerHTML;
-        btnSubmit.innerHTML = `<svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...`;
-        btnSubmit.disabled = true;
+        const btn = document.getElementById('btn-submit-vehicle');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = 'Saving...';
+        btn.disabled = true;
 
         try {
-          // 1. Logika Upload File
           const fileInput = document.getElementById('v-image-file');
           const file = fileInput.files[0];
           let imageUrl = null;
-
           if (file) {
             const fileExt = file.name.split('.').pop();
             const uniqueFileName = `${Date.now()}.${fileExt}`;
-
-            // Asumsi bucket bernama 'vehicles'
             const { error: uploadError } = await supabaseClient.storage.from('vehicles').upload(uniqueFileName, file);
-            if (uploadError) throw new Error("Gagal mengunggah gambar mobil: " + uploadError.message);
-
-            // Dapatkan URL Publik
-            const { data: publicUrlData } = supabaseClient.storage.from('vehicles').getPublicUrl(uniqueFileName);
-            imageUrl = publicUrlData.publicUrl;
+            if (uploadError) throw new Error("Gagal upload: " + uploadError.message);
+            const { data } = supabaseClient.storage.from('vehicles').getPublicUrl(uniqueFileName);
+            imageUrl = data.publicUrl;
           }
-
           const newVehicle = {
             name: document.getElementById('v-name').value,
             license_plate: document.getElementById('v-plate').value,
@@ -344,22 +485,24 @@
             image_emoji: document.getElementById('v-category').value.includes('Luxury') ? '🏎️' : '🚘',
             image_url: imageUrl
           };
-
           const { error } = await supabaseClient.from('vehicles').insert([newVehicle]);
           if (error) throw error;
-          
-          form.reset();
-          closeModal();
-          // Reload the table
+          document.getElementById('form-add-vehicle').reset();
+          addModal.classList.add('hidden');
           loadVehicles();
-        } catch (error) {
-          alert("Error: " + error.message);
-        } finally {
-          btnSubmit.innerHTML = originalText;
-          btnSubmit.disabled = false;
-        }
+        } catch (error) { alert("Error: " + error.message); } 
+        finally { btn.innerHTML = originalText; btn.disabled = false; }
       });
     });
+
+    // Lightbox Logic
+    window.openLightbox = (url) => {
+      document.getElementById('lightbox-img').src = url;
+      document.getElementById('modal-lightbox').classList.remove('hidden');
+    };
+    window.closeLightbox = () => {
+      document.getElementById('modal-lightbox').classList.add('hidden');
+    };
   </script>
 </body>
 </html>

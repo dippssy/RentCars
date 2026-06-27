@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html class="h-full bg-[#0a0c10]" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Admin Register — LUXDRIVE</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            'brand-dark': '#0a0c10',
+            'card-dark': '#161b22',
+            'accent-blue': '#0095ff',
+            'text-muted': '#8b949e',
+            'border-gray': '#30363d',
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; color: #ffffff; }
+    .glow-blue { box-shadow: 0 0 20px rgba(0, 149, 255, 0.3); }
+    .card-border { border: 1px solid rgba(255, 255, 255, 0.05); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+    @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 20px rgba(0, 149, 255, 0.2); } 50% { box-shadow: 0 0 40px rgba(0, 149, 255, 0.4); } }
+    .pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+  </style>
+</head>
+<body class="h-full flex items-center justify-center px-4">
+
+  <div class="w-full max-w-md animate-fade-in">
+    <div class="text-center mb-8">
+      <div class="w-14 h-14 bg-accent-blue rounded-xl flex items-center justify-center mx-auto mb-4 pulse-glow">
+        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"></path></svg>
+      </div>
+      <h1 class="text-3xl font-bold tracking-tight">Create <span class="text-accent-blue">Account</span></h1>
+      <p class="text-text-muted text-sm mt-2">Register a new admin account</p>
+    </div>
+
+    <div class="bg-card-dark rounded-2xl card-border p-8">
+      <form id="register-form">
+        <div class="space-y-5">
+          <div>
+            <label class="block text-sm font-medium text-text-muted mb-1.5">Full Name</label>
+            <input type="text" id="fullname" required
+              class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-4 py-3 text-white text-sm focus:border-accent-blue focus:ring-1 focus:ring-accent-blue transition-all"
+              placeholder="Your full name">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-text-muted mb-1.5">Email Address</label>
+            <input type="email" id="email" required
+              class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-4 py-3 text-white text-sm focus:border-accent-blue focus:ring-1 focus:ring-accent-blue transition-all"
+              placeholder="admin@luxdrive.com">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-text-muted mb-1.5">Password</label>
+            <input type="password" id="password" required
+              class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-4 py-3 text-white text-sm focus:border-accent-blue focus:ring-1 focus:ring-accent-blue transition-all"
+              placeholder="Min. 6 characters" minlength="6">
+          </div>
+        </div>
+
+        <div id="error-msg" class="hidden mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm"></div>
+        <div id="success-msg" class="hidden mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-400 text-sm"></div>
+
+        <button type="submit" id="btn-register"
+          class="w-full mt-6 py-3 bg-accent-blue hover:bg-blue-600 rounded-lg font-semibold text-white transition-all glow-blue flex items-center justify-center gap-2">
+          Create Account
+        </button>
+      </form>
+    </div>
+
+    <p class="text-center text-text-muted text-sm mt-6">
+      Already have an account?
+      <a href="login.html" class="text-accent-blue hover:underline font-medium">Sign in</a>
+    </p>
+  </div>
+
+  <script src="../js/supabase-config.js"></script>
+  <script>
+    const form = document.getElementById('register-form');
+    const errorMsg = document.getElementById('error-msg');
+    const successMsg = document.getElementById('success-msg');
+    const btnRegister = document.getElementById('btn-register');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.classList.add('hidden');
+      successMsg.classList.add('hidden');
+
+      const originalText = btnRegister.innerHTML;
+      btnRegister.innerHTML = `<svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Creating account...`;
+      btnRegister.disabled = true;
+
+      const fullname = document.getElementById('fullname').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const { error } = await supabaseClient.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: fullname } }
+      });
+
+      if (error) {
+        errorMsg.textContent = error.message;
+        errorMsg.classList.remove('hidden');
+      } else {
+        successMsg.textContent = 'Account created successfully! You can now sign in.';
+        successMsg.classList.remove('hidden');
+        form.reset();
+        setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+      }
+
+      btnRegister.innerHTML = originalText;
+      btnRegister.disabled = false;
+    });
+  </script>
+</body>
+</html>

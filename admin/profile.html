@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html class="h-full bg-[#0a0c10]" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Admin Profile - LUXDRIVE</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            'brand-dark': '#0a0c10',
+            'card-dark': '#161b22',
+            'accent-blue': '#0095ff',
+            'text-muted': '#8b949e',
+            'border-gray': '#30363d',
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; color: #ffffff; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0c10; }
+    ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+    .card-border { border: 1px solid rgba(255, 255, 255, 0.05); }
+
+    /* Sidebar Transitions */
+    #sidebar { transition: width 0.3s ease; }
+    #sidebar .nav-text, #sidebar .logo-text, #sidebar .profile-text { transition: opacity 0.2s ease, width 0.2s ease; white-space: nowrap; overflow: hidden; }
+    #sidebar.collapsed { width: 5rem; }
+    #sidebar.collapsed .nav-text, #sidebar.collapsed .logo-text, #sidebar.collapsed .profile-text { opacity: 0; width: 0; display: none; }
+    #sidebar.collapsed .px-4 { padding-left: 0.5rem; padding-right: 0.5rem; justify-content: center; }
+
+    /* Mobile Responsive */
+    @media (max-width: 767px) {
+      #sidebar { position: fixed; left: -100%; top: 0; bottom: 0; z-index: 50; width: 280px !important; transition: left 0.3s ease; }
+      #sidebar.mobile-open { left: 0; }
+      #sidebar.collapsed { width: 280px !important; }
+      #sidebar.collapsed .nav-text, #sidebar.collapsed .logo-text, #sidebar.collapsed .profile-text { opacity: 1; width: auto; display: inline; }
+      #sidebar-toggle { display: none; }
+    }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden">
+  
+  <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"></div>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="w-64 flex-shrink-0 bg-[#0a0c10] border-r border-border-gray flex flex-col">
+    <div class="p-6 flex items-center justify-between">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <div class="w-8 h-8 flex-shrink-0 bg-accent-blue rounded-md flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"></path></svg>
+        </div>
+        <span class="logo-text text-xl font-bold tracking-tight uppercase">LUXDRIVE</span>
+      </div>
+      <button id="sidebar-toggle" class="text-text-muted hover:text-white transition p-1">
+        <svg id="toggle-icon" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg>
+      </button>
+    </div>
+    
+    <nav class="flex-1 px-4 space-y-2 mt-4">
+      <a href="index.html" class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors group" title="Dashboard">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+        <span class="nav-text font-medium">Dashboard</span>
+      </a>
+      <a href="fleet.html" class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Fleet Management">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+        <span class="nav-text">Fleet Management</span>
+      </a>
+      <a href="bookings.html" class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Bookings">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <span class="nav-text">Bookings</span>
+      </a>
+      <a href="customers.html" class="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Customers">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        <span class="nav-text">Customers</span>
+      </a>
+    </nav>
+
+    <!-- Admin Profile + Logout -->
+    <div class="p-4 border-t border-border-gray space-y-3">
+      <a href="profile.html" class="flex items-center gap-3 overflow-hidden px-2 hover:bg-white/5 p-2 rounded-lg transition-colors group cursor-pointer bg-white/5">
+        <div class="w-9 h-9 rounded-full bg-accent-blue/20 flex items-center justify-center flex-shrink-0 group-hover:bg-accent-blue/30 transition">
+          <svg class="w-5 h-5 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+        </div>
+        <div class="profile-text flex-1 min-w-0">
+          <p id="admin-name" class="text-sm font-medium truncate text-white">Admin</p>
+          <p id="admin-email" class="text-xs text-text-muted truncate">admin@luxdrive.com</p>
+        </div>
+      </a>
+      <button id="btn-logout" class="profile-text w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    <header class="h-14 md:h-16 flex items-center justify-between px-4 md:px-8 bg-[#0a0c10]/80 backdrop-blur-sm sticky top-0 z-10 border-b border-border-gray">
+      <button id="mobile-menu-btn" class="md:hidden text-text-muted hover:text-white p-1">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+      </button>
+      <div class="flex-1"></div>
+      <div class="flex items-center gap-6 ml-4"><div class="flex items-center gap-2 cursor-pointer group"><span class="text-sm font-medium">Admin Mode</span></div></div>
+    </header>
+
+    <div class="p-4 md:p-8 max-w-2xl mx-auto w-full">
+      <h1 class="font-bold text-2xl md:text-3xl mb-8">Edit Profile</h1>
+      
+      <div class="bg-card-dark rounded-2xl card-border overflow-hidden">
+        <form id="form-edit-profile" class="p-6 md:p-8 space-y-6">
+          <div id="profile-message" class="hidden p-4 rounded-lg text-sm mb-4"></div>
+
+          <div>
+            <label class="block text-sm font-medium text-text-muted mb-2">Email Address</label>
+            <input type="email" id="profile-email" disabled class="w-full bg-[#0a0c10]/50 border border-border-gray rounded-lg px-4 py-3 text-gray-400 text-sm cursor-not-allowed">
+            <p class="text-xs text-text-muted mt-2">Email cannot be changed currently.</p>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-text-muted mb-2">Full Name</label>
+            <input type="text" id="profile-name" required class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-4 py-3 text-white text-sm focus:border-accent-blue focus:ring-1 focus:ring-accent-blue transition-colors">
+          </div>
+
+          <div class="pt-4 border-t border-border-gray">
+            <h3 class="text-lg font-medium mb-4">Change Password</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-text-muted mb-2">New Password (Optional)</label>
+                <input type="password" id="profile-password" minlength="6" class="w-full bg-[#0a0c10] border border-border-gray rounded-lg px-4 py-3 text-white text-sm focus:border-accent-blue focus:ring-1 focus:ring-accent-blue transition-colors" placeholder="Leave blank to keep current password">
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-6 flex justify-end">
+            <button type="submit" id="btn-save-profile" class="px-6 py-3 bg-accent-blue hover:bg-blue-600 text-white rounded-lg font-semibold transition-all shadow-[0_0_15px_rgba(0,149,255,0.3)]">
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/supabase-config.js"></script>
+  <script src="js/admin.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Load current user data
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (user) {
+        document.getElementById('profile-email').value = user.email || '';
+        document.getElementById('profile-name').value = user.user_metadata?.full_name || '';
+      }
+
+      // Handle form submission
+      document.getElementById('form-edit-profile').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const btn = document.getElementById('btn-save-profile');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = 'Saving...';
+        btn.disabled = true;
+
+        const name = document.getElementById('profile-name').value;
+        const password = document.getElementById('profile-password').value;
+        const msgBox = document.getElementById('profile-message');
+
+        try {
+          const updates = { data: { full_name: name } };
+          if (password) {
+            updates.password = password;
+          }
+
+          const { error } = await supabaseClient.auth.updateUser(updates);
+          
+          if (error) throw error;
+
+          // Success message
+          msgBox.className = 'p-4 rounded-lg text-sm mb-4 bg-green-500/10 text-green-400 border border-green-500/20 block';
+          msgBox.textContent = 'Profile updated successfully!';
+          
+          // Clear password field
+          document.getElementById('profile-password').value = '';
+          
+          // Update sidebar name
+          const nameEl = document.getElementById('admin-name');
+          if (nameEl) nameEl.textContent = name;
+
+        } catch (error) {
+          msgBox.className = 'p-4 rounded-lg text-sm mb-4 bg-red-500/10 text-red-400 border border-red-500/20 block';
+          msgBox.textContent = 'Error updating profile: ' + error.message;
+        } finally {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
