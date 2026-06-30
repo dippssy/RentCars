@@ -96,20 +96,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const { data: bookings } = await supabaseClient.from('bookings').select('*').order('created_at', { ascending: false });
+            let { data: bookings, error: bookingsError } = await supabaseClient.from('bookings').select('*, customers(full_name), vehicles(name, image_url, image_emoji)').order('created_at', { ascending: false });
+            
+            if (bookingsError) {
+                console.error("Error fetching bookings with joins:", bookingsError);
+                // Fallback to simple select
+                const { data: fallbackBookings } = await supabaseClient.from('bookings').select('*').order('created_at', { ascending: false });
+                bookings = fallbackBookings;
+            }
+
             const { data: vehicles } = await supabaseClient.from('vehicles').select('*');
 
             const vehicleMap = {};
             if (vehicles) {
                 vehicles.forEach(v => {
                     vehicleMap[v.name] = { url: v.image_url, emoji: v.image_emoji };
+                    vehicleMap[v.id] = { url: v.image_url, emoji: v.image_emoji };
                 });
             }
 
             let totalRevenue = 0;
             let recentBookingsHtml = '';
             
-            if (bookings) {
+            if (bookings && bookings.length > 0) {
                 // Calculate Total Revenue (Completed & Active only)
                 bookings.forEach((b) => {
                     if (b.status === 'Completed' || b.status === 'Active') {
@@ -128,18 +137,29 @@ document.addEventListener('DOMContentLoaded', () => {
                                       b.status === 'Active' ? 'accent-blue/10 text-accent-blue' : 
                                       b.status === 'Cancelled' ? 'red-500/10 text-red-400' : 'yellow-500/10 text-yellow-400';
                     
-                    let vData = vehicleMap[b.vehicle_name] || {};
-                    let imageDisplay = vData.url 
-                        ? `<img src="${vData.url}" alt="${b.vehicle_name}" class="w-10 h-10 rounded-lg object-cover">`
-                        : `<div class="w-10 h-10 rounded-lg bg-[#252833] flex items-center justify-center text-xl">${vData.emoji || '🚘'}</div>`;
+                    let veh = b.vehicles || {};
+                    let cust = b.customers || {};
+                    
+                    // Allow fallback to old schema if join failed or if old data still present
+                    let vehicleName = veh.name || b.vehicle_name || "Unknown Vehicle";
+                    let customerName = cust.full_name || b.customer_name || "Unknown Customer";
+
+                    // Fallback to vehicleMap if join failed
+                    let vData = vehicleMap[vehicleName] || vehicleMap[b.vehicle_id] || {};
+                    let imgUrl = veh.image_url || vData.url;
+                    let emoji = veh.image_emoji || vData.emoji || '🚘';
+
+                    let imageDisplay = imgUrl 
+                        ? `<img src="${imgUrl}" alt="${vehicleName}" class="w-10 h-10 rounded-lg object-cover">`
+                        : `<div class="w-10 h-10 rounded-lg bg-[#252833] flex items-center justify-center text-xl">${emoji}</div>`;
 
                     recentBookingsHtml += `
                         <tr class="hover:bg-white/5 transition-colors">
                           <td class="px-4 md:px-6 py-4 flex items-center gap-3">
                             ${imageDisplay}
                             <div>
-                              <p class="text-sm font-semibold">${b.vehicle_name}</p>
-                              <p class="text-xs text-text-muted">${b.customer_name}</p>
+                              <p class="text-sm font-semibold">${vehicleName}</p>
+                              <p class="text-xs text-text-muted">${customerName}</p>
                             </div>
                           </td>
                           <td class="px-4 md:px-6 py-4 text-sm">${b.start_date}</td>

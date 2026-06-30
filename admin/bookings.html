@@ -25,6 +25,10 @@
     }
   </script>
   <style>
+    /* Ubah warna icon calendar menjadi putih */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+    }
     body { font-family: 'Inter', sans-serif; color: #ffffff; }
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #0a0c10; }
@@ -290,7 +294,7 @@
       const tbody = document.getElementById('bookings-table-body');
       
       try {
-        const { data: bookings, error } = await supabaseClient.from('bookings').select('*').order('created_at', { ascending: false });
+        const { data: bookings, error } = await supabaseClient.from('bookings').select('*, customers(full_name), vehicles(name)').order('created_at', { ascending: false });
         if (error) throw error;
         
         allBookings = bookings;
@@ -302,11 +306,14 @@
 
         let html = '';
         bookings.forEach(b => {
+          const custName = b.customers ? b.customers.full_name : "Unknown Customer";
+          const vehName = b.vehicles ? b.vehicles.name : "Unknown Vehicle";
+
           html += `
             <tr class="hover:bg-white/5 transition-colors">
               <td class="px-6 py-4 font-medium text-accent-blue">${b.booking_ref}</td>
-              <td class="px-6 py-4">${b.customer_name}</td>
-              <td class="px-6 py-4">${b.vehicle_name}</td>
+              <td class="px-6 py-4">${custName}</td>
+              <td class="px-6 py-4">${vehName}</td>
               <td class="px-6 py-4"><p>${b.start_date} - ${b.end_date}</p><p class="text-xs text-text-muted">${b.duration_days} days</p></td>
               <td class="px-6 py-4">${formatIDR(b.total_amount)}</td>
               <td class="px-6 py-4">${getStatusBadge(b.status)}</td>
@@ -346,33 +353,31 @@
         document.getElementById('edit-b-id').value = b.id;
         
         const custEl = document.getElementById('edit-b-customer');
-        if([...custEl.options].some(o => o.value === b.customer_name)) {
-            custEl.value = b.customer_name;
+        if([...custEl.options].some(o => o.value === b.customer_id)) {
+            custEl.value = b.customer_id;
         } else {
-            // fallback if customer not in list
             const opt = document.createElement('option');
-            opt.value = b.customer_name;
-            opt.text = b.customer_name;
+            opt.value = b.customer_id;
+            opt.text = b.customers ? b.customers.full_name : b.customer_id;
             custEl.add(opt);
-            custEl.value = b.customer_name;
+            custEl.value = b.customer_id;
         }
 
         const vehEl = document.getElementById('edit-b-vehicle');
-        if([...vehEl.options].some(o => o.value === b.vehicle_name)) {
-            vehEl.value = b.vehicle_name;
+        if([...vehEl.options].some(o => o.value === b.vehicle_id)) {
+            vehEl.value = b.vehicle_id;
         } else {
             const opt = document.createElement('option');
-            opt.value = b.vehicle_name;
-            opt.text = b.vehicle_name;
+            opt.value = b.vehicle_id;
+            opt.text = b.vehicles ? b.vehicles.name : b.vehicle_id;
             vehEl.add(opt);
-            vehEl.value = b.vehicle_name;
+            vehEl.value = b.vehicle_id;
         }
 
         // Handle date formats
         let startVal = b.start_date;
         let endVal = b.end_date;
         
-        // Try to parse if it's not YYYY-MM-DD
         if (startVal && !startVal.match(/^\d{4}-\d{2}-\d{2}$/)) {
             const d = new Date(startVal + " " + new Date().getFullYear());
             if(!isNaN(d)) startVal = d.toISOString().split('T')[0];
@@ -399,8 +404,8 @@
       e.preventDefault();
       const id = document.getElementById('edit-b-id').value;
       const updates = {
-        customer_name: document.getElementById('edit-b-customer').value,
-        vehicle_name: document.getElementById('edit-b-vehicle').value,
+        customer_id: document.getElementById('edit-b-customer').value,
+        vehicle_id: document.getElementById('edit-b-vehicle').value,
         start_date: document.getElementById('edit-b-start').value,
         end_date: document.getElementById('edit-b-end').value,
         duration_days: parseInt(document.getElementById('edit-b-duration').value) || 0,
@@ -416,18 +421,24 @@
     // Form Options & Calculations
     async function loadFormOptions() {
       // Load Customers
-      const { data: customers } = await supabaseClient.from('customers').select('full_name').order('full_name');
+      const { data: customers } = await supabaseClient.from('customers').select('id, full_name, status').order('full_name');
       const bCust = document.getElementById('b-customer');
       const eCust = document.getElementById('edit-b-customer');
       let custHtml = '<option value="">Select a customer...</option>';
+      let editCustHtml = '<option value="">Select a customer...</option>';
       if (customers) {
-        customers.forEach(c => custHtml += `<option value="${c.full_name}">${c.full_name}</option>`);
+        customers.forEach(c => {
+          if (c.status === 'Verified') {
+            custHtml += `<option value="${c.id}">${c.full_name}</option>`;
+          }
+          editCustHtml += `<option value="${c.id}">${c.full_name} (${c.status})</option>`;
+        });
       }
       if (bCust) bCust.innerHTML = custHtml;
-      if (eCust) eCust.innerHTML = custHtml;
+      if (eCust) eCust.innerHTML = editCustHtml;
 
       // Load Vehicles
-      const { data: vehicles } = await supabaseClient.from('vehicles').select('name, status, daily_rate').order('name');
+      const { data: vehicles } = await supabaseClient.from('vehicles').select('id, name, status, daily_rate').order('name');
       const bVeh = document.getElementById('b-vehicle');
       const eVeh = document.getElementById('edit-b-vehicle');
       let vehHtml = '<option value="" data-rate="0">Select a vehicle (Available only)...</option>';
@@ -435,9 +446,9 @@
       if (vehicles) {
         vehicles.forEach(v => {
           if (v.status === 'Available') {
-            vehHtml += `<option value="${v.name}" data-rate="${v.daily_rate}">${v.name} - ${formatIDR(v.daily_rate)}/day</option>`;
+            vehHtml += `<option value="${v.id}" data-rate="${v.daily_rate}">${v.name} - ${formatIDR(v.daily_rate)}/day</option>`;
           }
-          editVehHtml += `<option value="${v.name}" data-rate="${v.daily_rate}">${v.name} (${v.status}) - ${formatIDR(v.daily_rate)}/day</option>`;
+          editVehHtml += `<option value="${v.id}" data-rate="${v.daily_rate}">${v.name} (${v.status}) - ${formatIDR(v.daily_rate)}/day</option>`;
         });
       }
       if (bVeh) bVeh.innerHTML = vehHtml;
@@ -474,10 +485,23 @@
     }
 
     // Attach listeners
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('b-start').min = today;
+
     ['b', 'edit-b'].forEach(prefix => {
-        ['start', 'end', 'vehicle'].forEach(field => {
-            document.getElementById(`${prefix}-${field}`).addEventListener('change', () => calculateDurationAndAmount(prefix));
+        const startEl = document.getElementById(`${prefix}-start`);
+        const endEl = document.getElementById(`${prefix}-end`);
+        
+        startEl.addEventListener('change', () => {
+            endEl.min = startEl.value;
+            if (endEl.value && endEl.value < startEl.value) {
+                endEl.value = '';
+            }
+            calculateDurationAndAmount(prefix);
         });
+
+        document.getElementById(`${prefix}-end`).addEventListener('change', () => calculateDurationAndAmount(prefix));
+        document.getElementById(`${prefix}-vehicle`).addEventListener('change', () => calculateDurationAndAmount(prefix));
     });
 
     // Add New Booking
@@ -500,8 +524,8 @@
 
         const newBooking = {
           booking_ref: '#BKG-' + Math.floor(1000 + Math.random() * 9000),
-          customer_name: document.getElementById('b-customer').value,
-          vehicle_name: document.getElementById('b-vehicle').value,
+          customer_id: document.getElementById('b-customer').value,
+          vehicle_id: document.getElementById('b-vehicle').value,
           start_date: document.getElementById('b-start').value,
           end_date: document.getElementById('b-end').value,
           duration_days: parseInt(document.getElementById('b-duration').value) || 0,
@@ -513,15 +537,14 @@
           const { error } = await supabaseClient.from('bookings').insert([newBooking]);
           if (error) throw error;
           
-          // if booking is saved, also update vehicle status to 'On Rent' if booking status is Active
           if (newBooking.status === 'Active') {
-            await supabaseClient.from('vehicles').update({ status: 'On Rent' }).eq('name', newBooking.vehicle_name);
+            await supabaseClient.from('vehicles').update({ status: 'On Rent' }).eq('id', newBooking.vehicle_id);
           }
 
           document.getElementById('form-new-booking').reset();
           addModal.classList.add('hidden');
           loadBookings();
-          loadFormOptions(); // reload options in case a vehicle is now 'On Rent'
+          loadFormOptions(); 
         } catch (error) { alert("Error adding booking: " + error.message); } 
         finally { btn.innerHTML = originalText; btn.disabled = false; }
       });
