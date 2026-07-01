@@ -403,19 +403,44 @@
     document.getElementById('form-edit-booking').addEventListener('submit', async (e) => {
       e.preventDefault();
       const id = document.getElementById('edit-b-id').value;
+      const vehicleId = document.getElementById('edit-b-vehicle').value;
+      const newStatus = document.getElementById('edit-b-status').value;
+      
+      const btn = e.submitter || document.querySelector('#form-edit-booking button[type="submit"]');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = 'Updating...';
+      btn.disabled = true;
+
       const updates = {
         customer_id: document.getElementById('edit-b-customer').value,
-        vehicle_id: document.getElementById('edit-b-vehicle').value,
+        vehicle_id: vehicleId,
         start_date: document.getElementById('edit-b-start').value,
         end_date: document.getElementById('edit-b-end').value,
         duration_days: parseInt(document.getElementById('edit-b-duration').value) || 0,
         total_amount: parseInt(document.getElementById('edit-b-amount').value) || 0,
-        status: document.getElementById('edit-b-status').value
+        status: newStatus
       };
       
-      const { error } = await supabaseClient.from('bookings').update(updates).eq('id', id);
-      if(error) alert("Error updating: " + error.message);
-      else { editModal.classList.add('hidden'); loadBookings(); }
+      try {
+        const { error } = await supabaseClient.from('bookings').update(updates).eq('id', id);
+        if(error) throw error;
+
+        // Auto-update vehicle status based on booking status
+        if (newStatus === 'Active') {
+            await supabaseClient.from('vehicles').update({ status: 'On Rent' }).eq('id', vehicleId);
+        } else if (newStatus === 'Completed' || newStatus === 'Cancelled') {
+            await supabaseClient.from('vehicles').update({ status: 'Available' }).eq('id', vehicleId);
+        }
+
+        editModal.classList.add('hidden'); 
+        loadBookings(); 
+        loadFormOptions(); // Refresh available vehicles
+      } catch (err) {
+        alert("Error updating: " + err.message);
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
     });
 
     // Form Options & Calculations

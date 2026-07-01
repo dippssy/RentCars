@@ -93,7 +93,7 @@
 
     async function initDashboard() {
         // Retry mechanism: wait for supabaseClient to be available
-        if (!window.supabaseClient) {
+        if (typeof supabaseClient === 'undefined') {
             console.warn("supabaseClient not yet available, retrying in 500ms...");
             setTimeout(initDashboard, 500);
             return;
@@ -245,12 +245,8 @@
                 if (bookings.length === 0) {
                     recentBody.innerHTML = '<tr><td colspan="3" class="px-6 py-8 text-center text-text-muted">Belum ada data booking di database.</td></tr>';
                 } else {
-                    // Prioritize ongoing bookings
-                    let ongoing = bookings.filter(b => b.status === 'Active' || b.status === 'Pending');
-                    let displayList = ongoing.length > 0 ? ongoing : bookings;
-
                     let html = '';
-                    displayList.slice(0, 5).forEach(b => {
+                    bookings.slice(0, 5).forEach(b => {
                         const statusColors = {
                             'Completed': 'bg-green-500/10 text-green-400 border-green-500/20',
                             'Active': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
