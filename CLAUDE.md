@@ -1,1 +1,1 @@
-Buat agar jika status user tidak verified maka tidak muncul pada daftar pelanggan jika ingin menambah booking, kemudian ubah warna icon calender pada form booking menjadi warna putih.
+tolong analisa file index pasa bagian admin, mengapa total revenue, active rentals dll masih 0 datanya dan belum terhubung ke database?, bantu saya untuk menghubungkan dashboard penih ke database mulai dari total revenue hingga booking, buat agar menggubakan diagram standart industri

@@ -1,4 +1,6 @@
-document.addEventListener('DOMContentLoaded', () => {
+(function() {
+    // Wait a tick to ensure supabase-config.js has been executed
+    // (both scripts are loaded at end of body, so DOM is already ready)
     // === Auth Guard: Protect admin pages (skip on login/register pages) ===
     const isAuthPage = window.location.pathname.includes('login.html') || window.location.pathname.includes('register.html');
     if (!isAuthPage && typeof checkAdminAuth === 'function') {
@@ -90,153 +92,380 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function initDashboard() {
+        // Retry mechanism: wait for supabaseClient to be available
         if (!window.supabaseClient) {
-            console.error("Supabase client not loaded.");
+            console.warn("supabaseClient not yet available, retrying in 500ms...");
+            setTimeout(initDashboard, 500);
             return;
         }
 
+        const formatIDR = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+
         try {
-            let { data: bookings, error: bookingsError } = await supabaseClient.from('bookings').select('*, customers(full_name), vehicles(name, image_url, image_emoji)').order('created_at', { ascending: false });
-            
-            if (bookingsError) {
-                console.error("Error fetching bookings with joins:", bookingsError);
-                // Fallback to simple select
-                const { data: fallbackBookings } = await supabaseClient.from('bookings').select('*').order('created_at', { ascending: false });
-                bookings = fallbackBookings;
+            // ========================================
+            // 1. FETCH ALL DATA FROM DATABASE
+            // ========================================
+            let bookings = null;
+            let vehicles = null;
+            let customers = null;
+
+            // Attempt fetching bookings with relational join
+            const { data: bData, error: bErr } = await supabaseClient
+                .from('bookings')
+                .select('*, customers(full_name), vehicles(name, image_url, image_emoji)')
+                .order('created_at', { ascending: false });
+
+            if (bErr) {
+                console.warn("Join query failed, falling back to simple select:", bErr.message);
+                const { data: bFallback } = await supabaseClient
+                    .from('bookings')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                bookings = bFallback || [];
+            } else {
+                bookings = bData || [];
             }
 
-            const { data: vehicles } = await supabaseClient.from('vehicles').select('*');
+            const { data: vData } = await supabaseClient.from('vehicles').select('*');
+            vehicles = vData || [];
 
+            const { data: cData } = await supabaseClient.from('customers').select('*');
+            customers = cData || [];
+
+            // Build vehicle lookup map (by ID and by name)
             const vehicleMap = {};
-            if (vehicles) {
-                vehicles.forEach(v => {
-                    vehicleMap[v.name] = { url: v.image_url, emoji: v.image_emoji };
-                    vehicleMap[v.id] = { url: v.image_url, emoji: v.image_emoji };
-                });
-            }
+            vehicles.forEach(v => {
+                vehicleMap[v.id] = v;
+                vehicleMap[v.name] = v;
+            });
 
+            // ========================================
+            // 2. CALCULATE KEY METRICS
+            // ========================================
             let totalRevenue = 0;
-            let recentBookingsHtml = '';
-            
-            if (bookings && bookings.length > 0) {
-                // Calculate Total Revenue (Completed & Active only)
-                bookings.forEach((b) => {
-                    if (b.status === 'Completed' || b.status === 'Active') {
-                        totalRevenue += b.total_amount;
+            let activeBookingsCount = 0;
+            let completedBookingsCount = 0;
+            let pendingBookingsCount = 0;
+            let cancelledBookingsCount = 0;
+            const monthlyRevenue = {}; // { 'Jan 2026': 1500000, ... }
+
+            bookings.forEach(b => {
+                if (b.status === 'Active' || b.status === 'Completed') {
+                    totalRevenue += (b.total_amount || 0);
+                }
+                if (b.status === 'Active') activeBookingsCount++;
+                if (b.status === 'Completed') completedBookingsCount++;
+                if (b.status === 'Pending') pendingBookingsCount++;
+                if (b.status === 'Cancelled') cancelledBookingsCount++;
+
+                // Group revenue by month
+                if ((b.status === 'Active' || b.status === 'Completed') && b.start_date) {
+                    const d = new Date(b.start_date);
+                    if (!isNaN(d)) {
+                        const monthKey = d.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+                        monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + (b.total_amount || 0);
                     }
-                });
+                }
+            });
 
-                // Filter for ongoing bookings (Active or Pending)
-                let ongoingBookings = bookings.filter(b => b.status === 'Active' || b.status === 'Pending');
-                
-                // Fallback to latest bookings if no ongoing bookings exist
-                let displayBookings = ongoingBookings.length > 0 ? ongoingBookings : bookings;
-
-                displayBookings.slice(0, 5).forEach((b) => {
-                    let statusColor = b.status === 'Completed' ? 'green-500/10 text-green-400' : 
-                                      b.status === 'Active' ? 'accent-blue/10 text-accent-blue' : 
-                                      b.status === 'Cancelled' ? 'red-500/10 text-red-400' : 'yellow-500/10 text-yellow-400';
-                    
-                    let veh = b.vehicles || {};
-                    let cust = b.customers || {};
-                    
-                    // Allow fallback to old schema if join failed or if old data still present
-                    let vehicleName = veh.name || b.vehicle_name || "Unknown Vehicle";
-                    let customerName = cust.full_name || b.customer_name || "Unknown Customer";
-
-                    // Fallback to vehicleMap if join failed
-                    let vData = vehicleMap[vehicleName] || vehicleMap[b.vehicle_id] || {};
-                    let imgUrl = veh.image_url || vData.url;
-                    let emoji = veh.image_emoji || vData.emoji || '🚘';
-
-                    let imageDisplay = imgUrl 
-                        ? `<img src="${imgUrl}" alt="${vehicleName}" class="w-10 h-10 rounded-lg object-cover">`
-                        : `<div class="w-10 h-10 rounded-lg bg-[#252833] flex items-center justify-center text-xl">${emoji}</div>`;
-
-                    recentBookingsHtml += `
-                        <tr class="hover:bg-white/5 transition-colors">
-                          <td class="px-4 md:px-6 py-4 flex items-center gap-3">
-                            ${imageDisplay}
-                            <div>
-                              <p class="text-sm font-semibold">${vehicleName}</p>
-                              <p class="text-xs text-text-muted">${customerName}</p>
-                            </div>
-                          </td>
-                          <td class="px-4 md:px-6 py-4 text-sm">${b.start_date}</td>
-                          <td class="px-4 md:px-6 py-4"><span class="px-2 py-1 bg-${statusColor} text-xs rounded-full font-medium border border-current">${b.status}</span></td>
-                        </tr>
-                    `;
-                });
-                document.getElementById('recent-bookings-body').innerHTML = recentBookingsHtml || '<tr><td colspan="3" class="text-center py-4">No recent bookings</td></tr>';
-            }
-
-            document.getElementById('total-revenue-text').textContent = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalRevenue);
-
-            let categoryCounts = { 'SUV': 0, 'MPV': 0, 'Luxury': 0, 'Luxury MPV': 0 };
+            // Vehicle stats
+            let totalVehicles = vehicles.length;
             let activeRentalsCount = 0;
-            let statusByCategory = {
-                'SUV': { available: 0, rented: 0 },
-                'MPV': { available: 0, rented: 0 },
-                'Luxury': { available: 0, rented: 0 },
-                'Luxury MPV': { available: 0, rented: 0 }
-            };
+            let availableCount = 0;
+            let maintenanceCount = 0;
+            const categoryCounts = {};
+            const statusByCategory = {};
 
-            if (vehicles) {
-                vehicles.forEach(v => {
-                    let cat = v.category;
-                    if (!categoryCounts[cat]) { categoryCounts[cat] = 0; statusByCategory[cat] = { available: 0, rented: 0 }; }
-                    categoryCounts[cat]++;
-                    if (v.status === 'On Rent') { activeRentalsCount++; statusByCategory[cat].rented++; }
-                    else if (v.status === 'Available') { statusByCategory[cat].available++; }
-                });
-            }
+            vehicles.forEach(v => {
+                const cat = v.category || 'Other';
+                if (!categoryCounts[cat]) {
+                    categoryCounts[cat] = 0;
+                    statusByCategory[cat] = { available: 0, rented: 0, maintenance: 0 };
+                }
+                categoryCounts[cat]++;
 
-            document.getElementById('total-vehicles-text').textContent = activeRentalsCount;
-            document.getElementById('count-suv').textContent = categoryCounts['SUV'] || 0;
-            let sedanLabel = document.getElementById('count-sedan')?.previousElementSibling?.querySelector('span:nth-child(2)');
-            if (sedanLabel) sedanLabel.textContent = 'MPV';
+                if (v.status === 'On Rent') {
+                    activeRentalsCount++;
+                    statusByCategory[cat].rented++;
+                } else if (v.status === 'Available') {
+                    availableCount++;
+                    statusByCategory[cat].available++;
+                } else if (v.status === 'Maintenance') {
+                    maintenanceCount++;
+                    statusByCategory[cat].maintenance++;
+                }
+            });
+
+            // Customer stats
+            const totalCustomers = customers.length;
+
+            // ========================================
+            // 3. UPDATE DASHBOARD WIDGETS
+            // ========================================
+            const revEl = document.getElementById('total-revenue-text');
+            if (revEl) revEl.textContent = formatIDR(totalRevenue);
+
+            const vehEl = document.getElementById('total-vehicles-text');
+            if (vehEl) vehEl.textContent = activeRentalsCount;
+
+            // Update category counts
+            const suvEl = document.getElementById('count-suv');
+            if (suvEl) suvEl.textContent = categoryCounts['SUV'] || 0;
+            
             const sedanEl = document.getElementById('count-sedan');
             if (sedanEl) sedanEl.textContent = categoryCounts['MPV'] || 0;
+            // Update label to MPV
+            const sedanLabel = sedanEl?.closest('li')?.querySelector('.text-text-muted');
+            if (sedanLabel) sedanLabel.textContent = 'MPV';
+
             const luxEl = document.getElementById('count-luxury');
             if (luxEl) luxEl.textContent = categoryCounts['Luxury'] || 0;
 
+            // Update new widgets
+            const tbEl = document.getElementById('total-bookings-text');
+            if (tbEl) tbEl.textContent = bookings.length;
+
+            const acEl = document.getElementById('active-count');
+            if (acEl) acEl.textContent = activeBookingsCount + ' Active';
+
+            const pdEl = document.getElementById('pending-count');
+            if (pdEl) pdEl.textContent = pendingBookingsCount + ' Pending';
+
+            const tcEl = document.getElementById('total-customers-text');
+            if (tcEl) tcEl.textContent = totalCustomers;
+
+            const ftEl = document.getElementById('fleet-total-label');
+            if (ftEl) ftEl.textContent = totalVehicles + ' vehicles';
+
+            // ========================================
+            // 4. RECENT BOOKINGS TABLE
+            // ========================================
+            const recentBody = document.getElementById('recent-bookings-body');
+            if (recentBody) {
+                if (bookings.length === 0) {
+                    recentBody.innerHTML = '<tr><td colspan="3" class="px-6 py-8 text-center text-text-muted">Belum ada data booking di database.</td></tr>';
+                } else {
+                    // Prioritize ongoing bookings
+                    let ongoing = bookings.filter(b => b.status === 'Active' || b.status === 'Pending');
+                    let displayList = ongoing.length > 0 ? ongoing : bookings;
+
+                    let html = '';
+                    displayList.slice(0, 5).forEach(b => {
+                        const statusColors = {
+                            'Completed': 'bg-green-500/10 text-green-400 border-green-500/20',
+                            'Active': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+                            'Pending': 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+                            'Cancelled': 'bg-red-500/10 text-red-400 border-red-500/20'
+                        };
+                        const statusClass = statusColors[b.status] || 'bg-gray-500/10 text-gray-400 border-gray-500/20';
+
+                        // Resolve names with fallback
+                        const veh = b.vehicles || {};
+                        const cust = b.customers || {};
+                        const vehicleName = veh.name || b.vehicle_name || 'Unknown Vehicle';
+                        const customerName = cust.full_name || b.customer_name || 'Unknown Customer';
+
+                        // Resolve image with fallback
+                        const vLookup = vehicleMap[vehicleName] || vehicleMap[b.vehicle_id] || {};
+                        const imgUrl = veh.image_url || vLookup.image_url;
+                        const emoji = veh.image_emoji || vLookup.image_emoji || '🚘';
+
+                        const imageDisplay = imgUrl
+                            ? `<img src="${imgUrl}" alt="${vehicleName}" class="w-10 h-10 rounded-lg object-cover">`
+                            : `<div class="w-10 h-10 rounded-lg bg-[#252833] flex items-center justify-center text-xl">${emoji}</div>`;
+
+                        html += `
+                            <tr class="hover:bg-white/5 transition-colors">
+                              <td class="px-4 md:px-6 py-4 flex items-center gap-3">
+                                ${imageDisplay}
+                                <div>
+                                  <p class="text-sm font-semibold">${vehicleName}</p>
+                                  <p class="text-xs text-text-muted">${customerName}</p>
+                                </div>
+                              </td>
+                              <td class="px-4 md:px-6 py-4 text-sm">${b.start_date || '-'}</td>
+                              <td class="px-4 md:px-6 py-4"><span class="px-2 py-1 ${statusClass} text-xs rounded-full font-medium border">${b.status}</span></td>
+                            </tr>
+                        `;
+                    });
+                    recentBody.innerHTML = html;
+                }
+            }
+
+            // ========================================
+            // 5. CHART.JS — INDUSTRY-STANDARD DIAGRAMS
+            // ========================================
             Chart.defaults.color = '#8b949e';
             Chart.defaults.font.family = "'Inter', sans-serif";
 
+            // --- 5A. Revenue Chart (Area/Line — Monthly from DB) ---
             const revCtx = document.getElementById('revenueChart');
             if (revCtx) {
-                const gradient = revCtx.getContext('2d').createLinearGradient(0, 0, 0, 400);
-                gradient.addColorStop(0, 'rgba(0, 149, 255, 0.5)');
+                // Build last 6 months labels
+                const monthLabels = [];
+                const monthData = [];
+                const now = new Date();
+                for (let i = 5; i >= 0; i--) {
+                    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    const key = d.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+                    const shortLabel = d.toLocaleString('en-US', { month: 'short' });
+                    monthLabels.push(shortLabel);
+                    monthData.push(monthlyRevenue[key] || 0);
+                }
+
+                const gradient = revCtx.getContext('2d').createLinearGradient(0, 0, 0, 200);
+                gradient.addColorStop(0, 'rgba(0, 149, 255, 0.4)');
                 gradient.addColorStop(1, 'rgba(0, 149, 255, 0)');
-                let base = totalRevenue / 7;
+
                 window.revenueChart = new Chart(revCtx, {
                     type: 'line',
-                    data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{ label: 'Revenue (Rp)', data: [base*0.5, base*0.8, base*1.2, base*0.9, base*1.5, base*2.0, base*1.8], borderColor: '#0095ff', backgroundColor: gradient, borderWidth: 3, tension: 0.4, fill: true, pointBackgroundColor: '#0095ff', pointBorderColor: '#161b22', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { displayColors: false } }, scales: { x: { grid: { display: false } }, y: { display: false } } }
+                    data: {
+                        labels: monthLabels,
+                        datasets: [{
+                            label: 'Revenue (Rp)',
+                            data: monthData,
+                            borderColor: '#0095ff',
+                            backgroundColor: gradient,
+                            borderWidth: 2.5,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#0095ff',
+                            pointBorderColor: '#161b22',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 7
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                displayColors: false,
+                                callbacks: {
+                                    label: (ctx) => formatIDR(ctx.parsed.y)
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: { display: false }
+                        }
+                    }
                 });
             }
 
+            // --- 5B. Active Rentals Donut Chart ---
             const rentCtx = document.getElementById('rentalsChart');
             if (rentCtx) {
+                const catLabels = Object.keys(statusByCategory);
+                const catRented = catLabels.map(l => statusByCategory[l].rented);
+                const palette = ['#2563eb', '#22d3ee', '#1e40af', '#7c3aed', '#f59e0b', '#ef4444'];
+
                 window.rentalsChart = new Chart(rentCtx, {
                     type: 'doughnut',
-                    data: { labels: ['SUV', 'MPV', 'Luxury', 'Luxury MPV'], datasets: [{ data: [statusByCategory['SUV']?.rented||0, statusByCategory['MPV']?.rented||0, statusByCategory['Luxury']?.rented||0, statusByCategory['Luxury MPV']?.rented||0], backgroundColor: ['#2563eb', '#22d3ee', '#1e40af', '#94a3b8'], borderWidth: 0, hoverOffset: 4 }] },
-                    options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } } }
+                    data: {
+                        labels: catLabels,
+                        datasets: [{
+                            data: catRented,
+                            backgroundColor: palette.slice(0, catLabels.length),
+                            borderWidth: 0,
+                            hoverOffset: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '75%',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => `${ctx.label}: ${ctx.parsed} rented`
+                                }
+                            }
+                        }
+                    }
                 });
             }
 
+            // --- 5C. Fleet Status — Stacked Bar Chart ---
             const fleetCtx = document.getElementById('fleetChart');
             if (fleetCtx) {
-                const labels = Object.keys(statusByCategory);
+                const catLabels = Object.keys(statusByCategory);
                 window.fleetChart = new Chart(fleetCtx, {
                     type: 'bar',
-                    data: { labels, datasets: [{ label: 'Rented', data: labels.map(l => statusByCategory[l].rented), backgroundColor: '#0095ff', borderRadius: {topLeft: 0, topRight: 0, bottomLeft: 4, bottomRight: 4}, barThickness: 16 }, { label: 'Available', data: labels.map(l => statusByCategory[l].available), backgroundColor: '#22d3ee', borderRadius: {topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0}, barThickness: 16 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, grid: { color: 'rgba(255, 255, 255, 0.05)' } } } }
+                    data: {
+                        labels: catLabels,
+                        datasets: [
+                            {
+                                label: 'On Rent',
+                                data: catLabels.map(l => statusByCategory[l].rented),
+                                backgroundColor: '#0095ff',
+                                borderRadius: 4,
+                                barThickness: 18
+                            },
+                            {
+                                label: 'Available',
+                                data: catLabels.map(l => statusByCategory[l].available),
+                                backgroundColor: '#22d3ee',
+                                borderRadius: 4,
+                                barThickness: 18
+                            },
+                            {
+                                label: 'Maintenance',
+                                data: catLabels.map(l => statusByCategory[l].maintenance),
+                                backgroundColor: '#f59e0b',
+                                borderRadius: 4,
+                                barThickness: 18
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 10,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    padding: 12,
+                                    font: { size: 10 }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                grid: { display: false },
+                                ticks: { font: { size: 10 } }
+                            },
+                            y: {
+                                stacked: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: {
+                                    stepSize: 1,
+                                    font: { size: 10 }
+                                }
+                            }
+                        }
+                    }
                 });
             }
+
+            console.log("Dashboard loaded successfully. Revenue:", formatIDR(totalRevenue), "| Vehicles:", totalVehicles, "| Active Rentals:", activeRentalsCount, "| Bookings:", bookings.length);
 
         } catch (error) {
             console.error("Dashboard init error:", error);
+            // Show error state in UI
+            const recentBody = document.getElementById('recent-bookings-body');
+            if (recentBody) {
+                recentBody.innerHTML = `<tr><td colspan="3" class="px-6 py-8 text-center text-red-400">Error loading data: ${error.message}</td></tr>`;
+            }
         }
     }
-});
+})();
