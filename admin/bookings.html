@@ -134,11 +134,12 @@
                 <th class="px-6 py-4 font-medium">Dates</th>
                 <th class="px-6 py-4 font-medium">Amount</th>
                 <th class="px-6 py-4 font-medium">Status</th>
+                <th class="px-6 py-4 font-medium text-center">Proof</th>
                 <th class="px-6 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody id="bookings-table-body" class="divide-y divide-border-gray text-sm">
-              <tr><td colspan="7" class="px-6 py-8 text-center text-text-muted">Loading bookings...</td></tr>
+              <tr><td colspan="8" class="px-6 py-8 text-center text-text-muted">Loading bookings...</td></tr>
             </tbody>
           </table>
         </div>
@@ -317,6 +318,15 @@
               <td class="px-6 py-4"><p>${b.start_date} - ${b.end_date}</p><p class="text-xs text-text-muted">${b.duration_days} days</p></td>
               <td class="px-6 py-4">${formatIDR(b.total_amount)}</td>
               <td class="px-6 py-4">${getStatusBadge(b.status)}</td>
+              <td class="px-6 py-4 text-center">
+                ${b.payment_proof_url 
+                  ? `<a href="${b.payment_proof_url}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded-md hover:bg-green-500/20 transition-colors" title="View Payment Proof">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                      View
+                    </a>`
+                  : '<span class="text-text-muted text-xs">—</span>'
+                }
+              </td>
               <td class="px-6 py-4 text-right">
                 <div class="flex justify-end gap-2">
                   <button onclick="editBooking('${b.id}')" class="p-1.5 text-accent-blue bg-accent-blue/10 hover:bg-accent-blue/20 rounded-md transition-colors" title="Edit">

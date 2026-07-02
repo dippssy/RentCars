@@ -8,6 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <nav class="navbar"><div class="flex items-center justify-between max-w-[1400px] mx-auto w-full">
@@ -47,79 +48,11 @@
       <button class="filter-tab" data-filter="luxury">Luxury</button>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div class="glass-card car-card" data-category="mpv" data-aos="fade-up">
-        <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=600&h=400&fit=crop" alt="Toyota Avanza" loading="lazy">
-        <div class="car-card-body">
-          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Toyota Avanza</h3><p class="text-secondary text-sm">MPV • 7 Seats</p></div><span class="car-card-price">Rp 350K<small class="text-secondary font-normal">/day</small></span></div>
-          <div class="car-card-specs"><span>⛽ Petrol</span><span>⚙️ Automatic</span><span>❄️ AC</span></div>
-          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
-        </div>
-      </div>
-      <div class="glass-card car-card" data-category="mpv" data-aos="fade-up" data-aos-delay="100">
-        <img src="https://images.unsplash.com/photo-1606611013016-969c19ba27d5?w=600&h=400&fit=crop" alt="Toyota Innova" loading="lazy">
-        <div class="car-card-body">
-          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Toyota Innova</h3><p class="text-secondary text-sm">MPV • 8 Seats</p></div><span class="car-card-price">Rp 500K<small class="text-secondary font-normal">/day</small></span></div>
-          <div class="car-card-specs"><span>⛽ Diesel</span><span>⚙️ Automatic</span><span>❄️ AC</span></div>
-          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
-        </div>
-      </div>
-      <div class="glass-card car-card" data-category="suv" data-aos="fade-up" data-aos-delay="200">
-        <img src="download.jpg" alt="Toyota Fortuner" loading="lazy">
-        <div class="car-card-body">
-          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Toyota Fortuner</h3><p class="text-secondary text-sm">SUV • 7 Seats</p></div><span class="car-card-price">Rp 850K<small class="text-secondary font-normal">/day</small></span></div>
-          <div class="car-card-specs"><span>⛽ Diesel</span><span>⚙️ Automatic</span><span>❄️ AC</span></div>
-          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
-        </div>
-      </div>
-      <div class="glass-card car-card" data-category="suv" data-aos="fade-up">
-        <img src="https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=600&h=400&fit=crop" alt="Pajero Sport" loading="lazy">
-        <div class="car-card-body">
-          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Pajero Sport</h3><p class="text-secondary text-sm">SUV • 7 Seats</p></div><span class="car-card-price">Rp 900K<small class="text-secondary font-normal">/day</small></span></div>
-          <div class="car-card-specs"><span>⛽ Diesel</span><span>⚙️ Automatic</span><span>❄️ AC</span></div>
-          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
-        </div>
-      </div>
-      <div class="glass-card car-card" data-category="luxury" data-aos="fade-up" data-aos-delay="100">
-        <img src="https://images.unsplash.com/photo-1563720223185-11003d516935?w=600&h=400&fit=crop" alt="Toyota Alphard" loading="lazy">
-        <div class="car-card-body">
-          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Toyota Alphard</h3><p class="text-secondary text-sm">Luxury • 7 Seats</p></div><span class="car-card-price">Rp 1.5M<small class="text-secondary font-normal">/day</small></span></div>
-          <div class="car-card-specs"><span>⛽ Petrol</span><span>⚙️ Automatic</span><span>❄️ AC</span></div>
-          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
-        </div>
-      </div>
-      <div class="glass-card car-card" data-category="sedan" data-aos="fade-up" data-aos-delay="200">
-        <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&h=400&fit=crop" alt="Toyota Camry" loading="lazy">
-        <div class="car-card-body">
-          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Toyota Camry</h3><p class="text-secondary text-sm">Sedan • 5 Seats</p></div><span class="car-card-price">Rp 700K<small class="text-secondary font-normal">/day</small></span></div>
-          <div class="car-card-specs"><span>⛽ Petrol</span><span>⚙️ Automatic</span><span>❄️ AC</span></div>
-          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
-        </div>
-      </div>
-      <div class="glass-card car-card" data-category="luxury" data-aos="fade-up">
-        <img src="https://images.unsplash.com/photo-1570733577524-3a047079e80d?w=600&h=400&fit=crop" alt="Toyota HiAce" loading="lazy">
-        <div class="car-card-body">
-          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Toyota HiAce</h3><p class="text-secondary text-sm">Van • 15 Seats</p></div><span class="car-card-price">Rp 1.2M<small class="text-secondary font-normal">/day</small></span></div>
-          <div class="car-card-specs"><span>⛽ Diesel</span><span>⚙️ Manual</span><span>❄️ AC</span></div>
-          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
-        </div>
-      </div>
-      <div class="glass-card car-card" data-category="mpv" data-aos="fade-up" data-aos-delay="100">
-        <img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&h=400&fit=crop" alt="Honda BRV" loading="lazy">
-        <div class="car-card-body">
-          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Honda BR-V</h3><p class="text-secondary text-sm">MPV • 7 Seats</p></div><span class="car-card-price">Rp 400K<small class="text-secondary font-normal">/day</small></span></div>
-          <div class="car-card-specs"><span>⛽ Petrol</span><span>⚙️ CVT</span><span>❄️ AC</span></div>
-          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
-        </div>
-      </div>
-      <div class="glass-card car-card" data-category="sedan" data-aos="fade-up" data-aos-delay="200">
-        <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&h=400&fit=crop" alt="Honda Civic" loading="lazy">
-        <div class="car-card-body">
-          <div class="flex justify-between items-start"><div><h3 class="car-card-title">Honda Civic</h3><p class="text-secondary text-sm">Sedan • 5 Seats</p></div><span class="car-card-price">Rp 600K<small class="text-secondary font-normal">/day</small></span></div>
-          <div class="car-card-specs"><span>⛽ Petrol</span><span>⚙️ CVT</span><span>❄️ AC</span></div>
-          <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
-        </div>
-      </div>
+    <div id="cars-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Skeleton loading cards -->
+      <div class="glass-card car-card" data-aos="fade-up"><div style="height:200px;background:var(--glass-bg);border-radius:12px 12px 0 0;animation:pulse 1.5s infinite;"></div><div class="car-card-body"><div style="height:16px;width:60%;background:var(--glass-border);border-radius:8px;margin-bottom:8px;animation:pulse 1.5s infinite;"></div><div style="height:12px;width:40%;background:var(--glass-border);border-radius:8px;animation:pulse 1.5s infinite;"></div></div></div>
+      <div class="glass-card car-card" data-aos="fade-up" data-aos-delay="100"><div style="height:200px;background:var(--glass-bg);border-radius:12px 12px 0 0;animation:pulse 1.5s infinite;"></div><div class="car-card-body"><div style="height:16px;width:60%;background:var(--glass-border);border-radius:8px;margin-bottom:8px;animation:pulse 1.5s infinite;"></div><div style="height:12px;width:40%;background:var(--glass-border);border-radius:8px;animation:pulse 1.5s infinite;"></div></div></div>
+      <div class="glass-card car-card" data-aos="fade-up" data-aos-delay="200"><div style="height:200px;background:var(--glass-bg);border-radius:12px 12px 0 0;animation:pulse 1.5s infinite;"></div><div class="car-card-body"><div style="height:16px;width:60%;background:var(--glass-border);border-radius:8px;margin-bottom:8px;animation:pulse 1.5s infinite;"></div><div style="height:12px;width:40%;background:var(--glass-border);border-radius:8px;animation:pulse 1.5s infinite;"></div></div></div>
     </div>
   </section>
 
@@ -134,6 +67,71 @@
   </footer>
 
   <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+  <script src="js/supabase-config.js"></script>
   <script src="js/main.js"></script>
+  <script>
+    (async function() {
+      if (typeof supabaseClient === 'undefined') return;
+      const { data: cars } = await supabaseClient.from('vehicles').select('*').order('name');
+      const grid = document.getElementById('cars-grid');
+      if (!grid || !cars) return;
+
+      const formatPrice = (n) => {
+        if (n >= 1000000) return 'Rp ' + (n/1000000).toFixed(1) + 'M';
+        if (n >= 1000) return 'Rp ' + Math.round(n/1000) + 'K';
+        return 'Rp ' + n.toLocaleString('id-ID');
+      };
+
+      const categoryMap = (cat) => (cat || 'other').toLowerCase().replace(/\s+/g, '').replace('luxurypv','luxury');
+
+      grid.innerHTML = cars.map((v, i) => {
+        const isAvailable = v.status === 'Available';
+        const statusBadge = isAvailable
+          ? '<span style="background:rgba(34,197,94,0.15);color:#22c55e;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:600;">Available</span>'
+          : '<span style="background:rgba(239,68,68,0.15);color:#ef4444;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:600;">On Rent</span>';
+        return `
+          <div class="glass-card car-card" data-category="${categoryMap(v.category)}" data-aos="fade-up" data-aos-delay="${(i % 3) * 100}">
+            <div style="position:relative;">
+              <img src="${v.image_url || 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=600&h=400&fit=crop'}" alt="${v.name}" loading="lazy" style="height:200px;object-fit:cover;width:100%;${!isAvailable ? 'filter:brightness(0.6);' : ''}">
+              <div style="position:absolute;top:12px;right:12px;">${statusBadge}</div>
+            </div>
+            <div class="car-card-body">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h3 class="car-card-title">${v.name}</h3>
+                  <p class="text-secondary text-sm">${v.category || 'Car'} \u2022 ${v.seats || '7'} Seats</p>
+                </div>
+                <span class="car-card-price">${formatPrice(v.daily_rate)}<small class="text-secondary font-normal">/day</small></span>
+              </div>
+              <div class="car-card-specs"><span>\u26fd ${v.fuel_type || 'Petrol'}</span><span>\u2699\ufe0f ${v.transmission || 'Automatic'}</span><span>\u2744\ufe0f AC</span></div>
+              ${isAvailable
+                ? '<a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>'
+                : '<button disabled class="btn-primary w-full justify-center mt-4 text-sm !py-2.5" style="opacity:0.4;cursor:not-allowed;">Currently Rented</button>'
+              }
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      AOS.refresh();
+
+      // Re-init filter tabs for dynamic content
+      const tabs = document.querySelectorAll('.filter-tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          const filter = tab.dataset.filter;
+          document.querySelectorAll('#cars-grid [data-category]').forEach(card => {
+            if (filter === 'all' || card.dataset.category === filter) {
+              card.style.display = '';
+              card.style.opacity = '0'; card.style.transform = 'translateY(20px)';
+              setTimeout(() => { card.style.transition = 'all 0.4s ease'; card.style.opacity = '1'; card.style.transform = 'translateY(0)'; }, 50);
+            } else { card.style.display = 'none'; }
+          });
+        });
+      });
+    })();
+  </script>
 </body>
 </html>

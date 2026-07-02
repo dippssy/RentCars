@@ -1,6 +1,12 @@
 /* ===== LUXDRIVE - Redesigned Premium Styles ===== */
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* Skeleton loading animation */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
 /* ===== DARK THEME (default) ===== */
 :root {
   --bg-primary: #0a0a0a;

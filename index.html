@@ -8,6 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -116,49 +117,11 @@
         </div>
         <a href="mobil.html" class="btn-outline mt-4 md:mt-0 text-sm">View All Cars →</a>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="glass-card car-card" data-aos="fade-up" data-aos-delay="0">
-          <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=600&h=400&fit=crop" alt="Toyota Avanza" loading="lazy">
-          <div class="car-card-body">
-            <div class="flex justify-between items-start">
-              <div>
-                <h3 class="car-card-title">Toyota Avanza</h3>
-                <p class="text-secondary text-sm">MPV • 7 Seats</p>
-              </div>
-              <span class="car-card-price">Rp 350K<small class="text-secondary font-normal">/day</small></span>
-            </div>
-            <div class="car-card-specs"><span>⛽ Petrol</span><span>⚙️ Automatic</span><span>❄️ AC</span></div>
-            <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
-          </div>
-        </div>
-        <div class="glass-card car-card" data-aos="fade-up" data-aos-delay="100">
-          <img src="https://images.unsplash.com/photo-1606611013016-969c19ba27d5?w=600&h=400&fit=crop" alt="Toyota Innova" loading="lazy">
-          <div class="car-card-body">
-            <div class="flex justify-between items-start">
-              <div>
-                <h3 class="car-card-title">Toyota Innova</h3>
-                <p class="text-secondary text-sm">MPV • 8 Seats</p>
-              </div>
-              <span class="car-card-price">Rp 500K<small class="text-secondary font-normal">/day</small></span>
-            </div>
-            <div class="car-card-specs"><span>⛽ Diesel</span><span>⚙️ Automatic</span><span>❄️ AC</span></div>
-            <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
-          </div>
-        </div>
-        <div class="glass-card car-card" data-aos="fade-up" data-aos-delay="200">
-          <img src="download.jpg" alt="Toyota Fortuner" loading="lazy">
-          <div class="car-card-body">
-            <div class="flex justify-between items-start">
-              <div>
-                <h3 class="car-card-title">Toyota Fortuner</h3>
-                <p class="text-secondary text-sm">SUV • 7 Seats</p>
-              </div>
-              <span class="car-card-price">Rp 850K<small class="text-secondary font-normal">/day</small></span>
-            </div>
-            <div class="car-card-specs"><span>⛽ Diesel</span><span>⚙️ Automatic</span><span>❄️ AC</span></div>
-            <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
-          </div>
-        </div>
+      <div id="popular-cars-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Skeleton loading -->
+        <div class="glass-card car-card skeleton-card" data-aos="fade-up"><div style="height:200px;background:var(--glass-bg);border-radius:12px 12px 0 0;animation:pulse 1.5s infinite;"></div><div class="car-card-body"><div style="height:16px;width:60%;background:var(--glass-border);border-radius:8px;margin-bottom:8px;animation:pulse 1.5s infinite;"></div><div style="height:12px;width:40%;background:var(--glass-border);border-radius:8px;animation:pulse 1.5s infinite;"></div></div></div>
+        <div class="glass-card car-card skeleton-card" data-aos="fade-up" data-aos-delay="100"><div style="height:200px;background:var(--glass-bg);border-radius:12px 12px 0 0;animation:pulse 1.5s infinite;"></div><div class="car-card-body"><div style="height:16px;width:60%;background:var(--glass-border);border-radius:8px;margin-bottom:8px;animation:pulse 1.5s infinite;"></div><div style="height:12px;width:40%;background:var(--glass-border);border-radius:8px;animation:pulse 1.5s infinite;"></div></div></div>
+        <div class="glass-card car-card skeleton-card" data-aos="fade-up" data-aos-delay="200"><div style="height:200px;background:var(--glass-bg);border-radius:12px 12px 0 0;animation:pulse 1.5s infinite;"></div><div class="car-card-body"><div style="height:16px;width:60%;background:var(--glass-border);border-radius:8px;margin-bottom:8px;animation:pulse 1.5s infinite;"></div><div style="height:12px;width:40%;background:var(--glass-border);border-radius:8px;animation:pulse 1.5s infinite;"></div></div></div>
       </div>
     </div>
   </section>
@@ -167,11 +130,11 @@
   <section class="section">
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center" data-aos="fade-up">
       <div class="glass-card p-8">
-        <div class="stat-number" data-count="150" data-suffix="+">0</div>
+        <div class="stat-number" id="stat-cars" data-suffix="+">...</div>
         <div class="stat-label">Premium Cars</div>
       </div>
       <div class="glass-card p-8">
-        <div class="stat-number" data-count="5000" data-suffix="+">0</div>
+        <div class="stat-number" id="stat-clients" data-suffix="+">...</div>
         <div class="stat-label">Happy Clients</div>
       </div>
       <div class="glass-card p-8">
@@ -179,8 +142,8 @@
         <div class="stat-label">Years Experience</div>
       </div>
       <div class="glass-card p-8">
-        <div class="stat-number" data-count="15" data-suffix="">0</div>
-        <div class="stat-label">City Branches</div>
+        <div class="stat-number" id="stat-bookings" data-suffix="+">...</div>
+        <div class="stat-label">Completed Rentals</div>
       </div>
     </div>
   </section>
@@ -235,6 +198,67 @@
   </footer>
 
   <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+  <script src="js/supabase-config.js"></script>
   <script src="js/main.js"></script>
+  <script>
+    // Fetch live stats and popular cars from Supabase
+    (async function() {
+      if (typeof supabaseClient === 'undefined') return;
+
+      // --- Stats ---
+      const { data: vehicles } = await supabaseClient.from('vehicles').select('id');
+      const { data: customers } = await supabaseClient.from('customers').select('id');
+      const { data: bookings } = await supabaseClient.from('bookings').select('id, status');
+
+      const carCount = vehicles ? vehicles.length : 0;
+      const clientCount = customers ? customers.length : 0;
+      const completedCount = bookings ? bookings.filter(b => b.status === 'Completed' || b.status === 'Active').length : 0;
+
+      function animateCount(el, target, suffix) {
+        if (!el) return;
+        let current = 0;
+        const increment = Math.max(1, Math.ceil(target / 50));
+        const timer = setInterval(() => {
+          current += increment;
+          if (current >= target) { current = target; clearInterval(timer); }
+          el.textContent = current + (suffix || '');
+        }, 30);
+      }
+
+      animateCount(document.getElementById('stat-cars'), carCount, '+');
+      animateCount(document.getElementById('stat-clients'), clientCount, '+');
+      animateCount(document.getElementById('stat-bookings'), completedCount, '+');
+
+      // --- Popular Cars (max 3) ---
+      const { data: cars } = await supabaseClient.from('vehicles').select('*').eq('status', 'Available').order('created_at', { ascending: false }).limit(3);
+      const grid = document.getElementById('popular-cars-grid');
+      if (grid && cars && cars.length > 0) {
+        const formatPrice = (n) => {
+          if (n >= 1000000) return 'Rp ' + (n/1000000).toFixed(1) + 'M';
+          if (n >= 1000) return 'Rp ' + Math.round(n/1000) + 'K';
+          return 'Rp ' + n.toLocaleString('id-ID');
+        };
+        grid.innerHTML = cars.map((v, i) => `
+          <div class="glass-card car-card" data-aos="fade-up" data-aos-delay="${i * 100}">
+            <img src="${v.image_url || 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=600&h=400&fit=crop'}" alt="${v.name}" loading="lazy" style="height:200px;object-fit:cover;width:100%;">
+            <div class="car-card-body">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h3 class="car-card-title">${v.name}</h3>
+                  <p class="text-secondary text-sm">${v.category || 'Car'} • ${v.seats || '7'} Seats</p>
+                </div>
+                <span class="car-card-price">${formatPrice(v.daily_rate)}<small class="text-secondary font-normal">/day</small></span>
+              </div>
+              <div class="car-card-specs"><span>⛽ ${v.fuel_type || 'Petrol'}</span><span>⚙️ ${v.transmission || 'Automatic'}</span><span>❄️ AC</span></div>
+              <a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>
+            </div>
+          </div>
+        `).join('');
+        AOS.refresh();
+      } else if (grid && (!cars || cars.length === 0)) {
+        grid.innerHTML = '<p class="text-secondary text-center col-span-3 py-8">No cars available at the moment.</p>';
+      }
+    })();
+  </script>
 </body>
 </html>
