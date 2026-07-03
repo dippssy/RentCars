@@ -79,6 +79,22 @@
             </div>
           </div>
 
+          <!-- Payment Info Box (Dynamic) -->
+          <div id="payment-info-box" class="mb-6 p-5 rounded-xl border" style="background:var(--glass-bg); border-color:var(--glass-border); display:block;" data-aos="fade-up">
+            <h4 class="text-sm font-semibold mb-2" style="color:var(--accent);" id="payment-info-title">Payment Instructions</h4>
+            <div id="payment-info-content" class="text-sm text-secondary space-y-2">
+              <p>Please transfer the exact amount to:</p>
+              <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--bg-secondary);">
+                <span class="font-semibold text-white">BCA - 1234 567 890</span>
+                <span class="text-xs">a.n LUXDRIVE</span>
+              </div>
+              <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--bg-secondary);">
+                <span class="font-semibold text-white">Mandiri - 098 765 4321</span>
+                <span class="text-xs">a.n LUXDRIVE</span>
+              </div>
+            </div>
+          </div>
+
           <div class="glass-strong p-8 mb-6" data-aos="fade-up">
             <h3 class="text-lg font-bold mb-6">Upload Payment Proof</h3>
             <p class="text-secondary text-sm mb-4">Please upload your bank transfer receipt or payment screenshot.</p>
@@ -263,6 +279,50 @@
           btn.innerHTML = originalText;
           btn.disabled = false;
         }
+      });
+    }
+
+    // Dynamic Payment Info logic
+    const paymentRadios = document.querySelectorAll('input[name="payment"]');
+    const paymentInfoBox = document.getElementById('payment-info-box');
+    const paymentInfoContent = document.getElementById('payment-info-content');
+    
+    if (paymentRadios.length > 0 && paymentInfoBox && paymentInfoContent) {
+      paymentRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          const val = e.target.value;
+          paymentInfoBox.style.display = 'block';
+          
+          if (val === 'transfer') {
+            paymentInfoContent.innerHTML = `
+              <p>Please transfer the exact amount to:</p>
+              <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--bg-secondary);">
+                <span class="font-semibold text-white">BCA - 1234 567 890</span>
+                <span class="text-xs">a.n LUXDRIVE</span>
+              </div>
+              <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--bg-secondary);">
+                <span class="font-semibold text-white">Mandiri - 098 765 4321</span>
+                <span class="text-xs">a.n LUXDRIVE</span>
+              </div>
+            `;
+          } else if (val === 'ewallet') {
+            paymentInfoContent.innerHTML = `
+              <p>Please scan our QRIS or send to our E-Wallet:</p>
+              <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--bg-secondary);">
+                <span class="font-semibold text-white">GoPay / OVO</span>
+                <span class="text-xs">0812-3456-7890</span>
+              </div>
+            `;
+          } else if (val === 'card') {
+            paymentInfoContent.innerHTML = `
+              <p>You will be redirected to our secure payment gateway after clicking "Confirm & Pay".</p>
+            `;
+          } else if (val === 'cash') {
+            paymentInfoContent.innerHTML = `
+              <p>Please prepare cash when the driver delivers the car. No payment proof is needed.</p>
+            `;
+          }
+        });
       });
     }
   </script>
