@@ -257,6 +257,8 @@
         const { data: customers, error } = await supabaseClient.from('customers').select('*').order('created_at', { ascending: true });
         if (error) throw error;
         
+        const { data: bookingsData } = await supabaseClient.from('bookings').select('customer_id, total_amount, status');
+        
         allCustomers = customers;
 
         if (!customers || customers.length === 0) {
@@ -266,6 +268,20 @@
 
         let html = '';
         customers.forEach(c => {
+          // Calculate dynamic totals based on actual bookings
+          let realRentals = 0;
+          let realSpent = 0;
+          
+          if (bookingsData) {
+             const custBookings = bookingsData.filter(b => b.customer_id === c.id);
+             realRentals = custBookings.length;
+             realSpent = custBookings.reduce((sum, b) => sum + (Number(b.total_amount) || 0), 0);
+          }
+          
+          // Use dynamic values if they exist, otherwise fallback to table columns
+          const displayRentals = realRentals > 0 ? realRentals : (c.total_rentals || 0);
+          const displaySpent = realSpent > 0 ? realSpent : (c.total_spent || 0);
+
           html += `
             <tr class="hover:bg-white/5 transition-colors">
               <td class="px-6 py-4 flex items-center gap-3">
@@ -273,8 +289,8 @@
                 <div><p class="font-semibold text-white">${c.full_name}</p><p class="text-xs text-text-muted">Joined ${c.join_date}</p></div>
               </td>
               <td class="px-6 py-4"><p>${c.email}</p><p class="text-xs text-text-muted">${c.phone}</p></td>
-              <td class="px-6 py-4">${c.total_rentals}</td>
-              <td class="px-6 py-4">${formatIDR(c.total_spent)}</td>
+              <td class="px-6 py-4 font-medium">${displayRentals}</td>
+              <td class="px-6 py-4 text-green-400 font-medium">${formatIDR(displaySpent)}</td>
               <td class="px-6 py-4">${getStatusBadge(c.status)}</td>
               <td class="px-6 py-4 text-right">
                 <div class="flex justify-end gap-2">
