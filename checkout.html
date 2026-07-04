@@ -29,6 +29,12 @@
   </div>
 
   <section class="section" style="padding-top:1rem;">
+    <div class="mb-6" data-aos="fade-right">
+      <button type="button" onclick="goBackToForm()" class="text-sm font-medium hover:text-white transition-colors flex items-center gap-2" style="color:var(--accent);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> 
+        Back to Edit Details
+      </button>
+    </div>
     <div class="steps mb-10" data-aos="fade-up">
       <div class="step"><span class="step-number" style="border-color:var(--accent);color:var(--accent);">✓</span><span>Select Car</span></div>
       <div class="step-line" style="background:var(--accent);"></div>
@@ -92,6 +98,14 @@
                 <span class="font-semibold text-white">Mandiri - 098 765 4321</span>
                 <span class="text-xs">a.n LUXDRIVE</span>
               </div>
+              <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--bg-secondary);">
+                <span class="font-semibold text-white">BNI - 1122 3344 55</span>
+                <span class="text-xs">a.n LUXDRIVE</span>
+              </div>
+              <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--bg-secondary);">
+                <span class="font-semibold text-white">BRI - 5544 3322 11</span>
+                <span class="text-xs">a.n LUXDRIVE</span>
+              </div>
             </div>
           </div>
 
@@ -125,23 +139,9 @@
       <div>
         <div class="glass-strong p-8 order-summary" data-aos="fade-left">
           <h3 class="text-lg font-bold mb-6">Order Summary</h3>
-          <div class="flex items-center gap-4 mb-6 p-4 rounded-xl" style="background:var(--accent-subtle);">
-            <img src="download.jpg" alt="Car" class="w-20 h-14 object-cover rounded-lg">
-            <div><p class="font-semibold text-sm">Toyota Fortuner</p><p class="text-secondary text-xs">SUV • Automatic • 7 Seats</p></div>
+          <div id="checkout-summary-content">
+            <p class="text-secondary text-sm">Loading summary...</p>
           </div>
-          <div class="space-y-1">
-            <div class="summary-row"><span class="text-secondary">Daily Rate</span><span>Rp 850,000</span></div>
-            <div class="summary-row"><span class="text-secondary">Duration</span><span>3 days</span></div>
-            <div class="summary-row"><span class="text-secondary">Subtotal</span><span>Rp 2,550,000</span></div>
-            <div class="summary-row"><span class="text-secondary">Insurance</span><span>Rp 225,000</span></div>
-            <div class="summary-row"><span class="text-secondary">Driver</span><span>Rp 450,000</span></div>
-            <div class="summary-row"><span class="text-secondary">Service Fee</span><span>Rp 50,000</span></div>
-          </div>
-          <div class="summary-total" style="border-top:1px solid var(--border-subtle);">
-            <span>Total</span>
-            <span class="text-xl" style="color:var(--text-primary);font-weight:800;">Rp 3,275,000</span>
-          </div>
-          <p class="text-secondary text-xs mt-4">* Price includes VAT. Fuel not included.</p>
         </div>
       </div>
     </div>
@@ -238,36 +238,51 @@
             }
           }
 
-          // Fetch a default customer and vehicle to create a realistic test booking
+          // Retrieve booking data from localStorage
+          const bookingData = JSON.parse(localStorage.getItem('bookingData'));
+          if (!bookingData) throw new Error("Booking data not found. Please return to the form.");
+
+          // Fetch a default customer to create a realistic test booking
           const { data: customers } = await supabaseClient.from('customers').select('id').limit(1);
-          const { data: vehicles } = await supabaseClient.from('vehicles').select('id, daily_rate').eq('status', 'Available').limit(1);
           
           const bookingRef = '#BKG-' + Math.floor(1000 + Math.random() * 9000);
           
-          if (customers && customers.length > 0 && vehicles && vehicles.length > 0) {
+          if (customers && customers.length > 0) {
             const customerId = customers[0].id;
-            const vehicleId = vehicles[0].id;
-            const today = new Date();
-            const endDate = new Date();
-            endDate.setDate(today.getDate() + 3);
 
             const newBooking = {
               booking_ref: bookingRef,
               customer_id: customerId,
-              vehicle_id: vehicleId,
-              start_date: today.toISOString().split('T')[0],
-              end_date: endDate.toISOString().split('T')[0],
-              duration_days: 3,
-              total_amount: (vehicles[0].daily_rate * 3) + 225000 + 450000 + 50000,
+              vehicle_id: bookingData.carId || null,
+              start_date: bookingData.startDate,
+              end_date: bookingData.endDate,
+              duration_days: bookingData.durationDays,
+              total_amount: bookingData.totalAmount,
               status: 'Pending',
               payment_proof_url: paymentProofUrl
             };
 
             const { error: insertErr } = await supabaseClient.from('bookings').insert([newBooking]);
-            if (insertErr) throw new Error('Failed to save booking: ' + insertErr.message);
+            if (insertErr) {
+              console.error(insertErr);
+              // fallback if vehicle_id violates foreign key (e.g. dummy ID passed)
+              if (insertErr.message.includes('foreign key constraint')) {
+                  const { data: vFallback } = await supabaseClient.from('vehicles').select('id').limit(1);
+                  if (vFallback && vFallback.length > 0) {
+                      newBooking.vehicle_id = vFallback[0].id;
+                      const { error: retryErr } = await supabaseClient.from('bookings').insert([newBooking]);
+                      if (retryErr) throw new Error('Failed to save booking: ' + retryErr.message);
+                  } else {
+                      throw new Error('Failed to save booking: ' + insertErr.message);
+                  }
+              } else {
+                  throw new Error('Failed to save booking: ' + insertErr.message);
+              }
+            }
             console.log('Booking successfully created with proof:', paymentProofUrl);
+            localStorage.removeItem('bookingData');
           } else {
-            console.warn('Could not create test booking because no customers or vehicles were found in the database.');
+            console.warn('Could not create booking because no customers were found in the database.');
           }
 
           // Show success modal
@@ -304,6 +319,14 @@
                 <span class="font-semibold text-white">Mandiri - 098 765 4321</span>
                 <span class="text-xs">a.n LUXDRIVE</span>
               </div>
+              <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--bg-secondary);">
+                <span class="font-semibold text-white">BNI - 1122 3344 55</span>
+                <span class="text-xs">a.n LUXDRIVE</span>
+              </div>
+              <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--bg-secondary);">
+                <span class="font-semibold text-white">BRI - 5544 3322 11</span>
+                <span class="text-xs">a.n LUXDRIVE</span>
+              </div>
             `;
           } else if (val === 'ewallet') {
             paymentInfoContent.innerHTML = `
@@ -324,6 +347,47 @@
           }
         });
       });
+    }
+
+    // Render Order Summary
+    const bData = JSON.parse(localStorage.getItem('bookingData'));
+    if (bData) {
+      const sumContainer = document.getElementById('checkout-summary-content');
+      const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+      
+      let html = `
+        <div class="flex items-center gap-4 mb-6 p-4 rounded-xl" style="background:var(--accent-subtle);">
+          <div class="w-16 h-12 bg-white/10 rounded-lg flex items-center justify-center text-2xl">🚗</div>
+          <div><p class="font-semibold text-sm">${bData.carName}</p><p class="text-secondary text-xs">Premium Rental</p></div>
+        </div>
+        <div class="space-y-1">
+          <div class="summary-row"><span class="text-secondary">Daily Rate</span><span>${formatIDR(bData.carPrice)}</span></div>
+          <div class="summary-row"><span class="text-secondary">Duration</span><span>${bData.durationDays} days</span></div>
+          <div class="summary-row"><span class="text-secondary">Subtotal</span><span>${formatIDR(bData.carPrice * bData.durationDays)}</span></div>
+      `;
+      
+      if (bData.options.driver) html += `<div class="summary-row"><span class="text-secondary">Driver</span><span>${formatIDR(150000 * bData.durationDays)}</span></div>`;
+      if (bData.options.childseat) html += `<div class="summary-row"><span class="text-secondary">Child Seat</span><span>${formatIDR(50000 * bData.durationDays)}</span></div>`;
+      if (bData.options.gps) html += `<div class="summary-row"><span class="text-secondary">GPS</span><span>${formatIDR(30000 * bData.durationDays)}</span></div>`;
+      if (bData.options.insurance) html += `<div class="summary-row"><span class="text-secondary">Insurance</span><span>${formatIDR(75000 * bData.durationDays)}</span></div>`;
+      
+      html += `
+        </div>
+        <div class="summary-total mt-4 pt-4" style="border-top:1px solid var(--border-subtle);">
+          <span>Total</span>
+          <span class="text-xl" style="color:var(--text-primary);font-weight:800;">${formatIDR(bData.totalAmount)}</span>
+        </div>
+        <p class="text-secondary text-xs mt-4">* Price includes VAT. Fuel not included.</p>
+      `;
+      sumContainer.innerHTML = html;
+    }
+
+    function goBackToForm() {
+      if (bData && bData.carId) {
+        window.location.href = 'sewa.html?car_id=' + bData.carId + '&name=' + encodeURIComponent(bData.carName) + '&price=' + bData.carPrice;
+      } else {
+        window.history.back();
+      }
     }
   </script>
 </body>

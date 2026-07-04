@@ -38,20 +38,18 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2">
-        <form onsubmit="event.preventDefault(); window.location.href='checkout.html';">
+        <form id="rental-form">
           <div class="glass-strong p-8 mb-6" data-aos="fade-up">
-            <h3 class="text-lg font-bold mb-6">1. Choose Your Vehicle</h3>
-            <div class="form-group">
-              <label class="form-label" for="car-select">Select Car</label>
-              <select id="car-select" class="form-input" required>
-                <option value="">— Choose a car —</option>
-                <option value="avanza">Toyota Avanza — Rp 350,000/day</option>
-                <option value="innova">Toyota Innova — Rp 500,000/day</option>
-                <option value="fortuner">Toyota Fortuner — Rp 850,000/day</option>
-                <option value="pajero">Pajero Sport — Rp 900,000/day</option>
-                <option value="alphard">Toyota Alphard — Rp 1,500,000/day</option>
-                <option value="hiace">Toyota HiAce — Rp 1,200,000/day</option>
-              </select>
+            <h3 class="text-lg font-bold mb-6">1. Rental Details</h3>
+            <div class="mb-6 p-4 rounded-xl border border-glass-border flex items-center justify-between" style="background:var(--accent-subtle);">
+              <div>
+                <p class="text-xs text-text-muted uppercase tracking-wider mb-1">Selected Vehicle</p>
+                <p class="font-semibold text-lg text-white" id="display-car-name">Loading...</p>
+              </div>
+              <div class="text-right">
+                <p class="text-xs text-text-muted uppercase tracking-wider mb-1">Daily Rate</p>
+                <p class="font-bold" style="color:var(--accent);" id="display-car-price">—</p>
+              </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="form-group"><label class="form-label" for="start-date">Pickup Date</label><input type="date" id="start-date" class="form-input" required></div>
@@ -67,16 +65,16 @@
             <h3 class="text-lg font-bold mb-6">2. Additional Options</h3>
             <div class="space-y-3">
               <label class="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition" style="background:transparent;" onmouseover="this.style.background='var(--accent-subtle)'" onmouseout="this.style.background='transparent'">
-                <input type="checkbox" class="w-4 h-4"> <span>Include Driver (+Rp 150,000/day)</span>
+                <input type="checkbox" id="opt-driver" class="w-4 h-4 option-cb" data-price="150000"> <span>Include Driver (+Rp 150,000/day)</span>
               </label>
               <label class="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition" style="background:transparent;" onmouseover="this.style.background='var(--accent-subtle)'" onmouseout="this.style.background='transparent'">
-                <input type="checkbox" class="w-4 h-4"> <span>Child Seat (+Rp 50,000/day)</span>
+                <input type="checkbox" id="opt-childseat" class="w-4 h-4 option-cb" data-price="50000"> <span>Child Seat (+Rp 50,000/day)</span>
               </label>
               <label class="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition" style="background:transparent;" onmouseover="this.style.background='var(--accent-subtle)'" onmouseout="this.style.background='transparent'">
-                <input type="checkbox" class="w-4 h-4"> <span>GPS Navigation (+Rp 30,000/day)</span>
+                <input type="checkbox" id="opt-gps" class="w-4 h-4 option-cb" data-price="30000"> <span>GPS Navigation (+Rp 30,000/day)</span>
               </label>
               <label class="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition" style="background:transparent;" onmouseover="this.style.background='var(--accent-subtle)'" onmouseout="this.style.background='transparent'">
-                <input type="checkbox" class="w-4 h-4"> <span>Full Insurance Coverage (+Rp 75,000/day)</span>
+                <input type="checkbox" id="opt-insurance" class="w-4 h-4 option-cb" data-price="75000"> <span>Full Insurance Coverage (+Rp 75,000/day)</span>
               </label>
             </div>
           </div>
@@ -96,13 +94,17 @@
           <div class="space-y-1">
             <div class="summary-row"><span class="text-secondary">Vehicle</span><span id="summary-car">—</span></div>
             <div class="summary-row"><span class="text-secondary">Duration</span><span id="rental-days">—</span></div>
-            <div class="summary-row"><span class="text-secondary">Pickup</span><span id="summary-pickup">—</span></div>
+            <div class="summary-row hidden" id="row-driver"><span class="text-secondary">Driver</span><span id="val-driver">—</span></div>
+            <div class="summary-row hidden" id="row-childseat"><span class="text-secondary">Child Seat</span><span id="val-childseat">—</span></div>
+            <div class="summary-row hidden" id="row-gps"><span class="text-secondary">GPS</span><span id="val-gps">—</span></div>
+            <div class="summary-row hidden" id="row-insurance"><span class="text-secondary">Insurance</span><span id="val-insurance">—</span></div>
+            <div class="summary-row"><span class="text-secondary">Pickup</span><span id="summary-pickup" class="text-right truncate max-w-[150px]">—</span></div>
           </div>
           <div class="summary-total mt-4 pt-4" style="border-top:1px solid var(--border-subtle);">
             <span>Estimated Total</span>
-            <span style="color:var(--accent);" id="rental-total">—</span>
+            <span style="color:var(--accent);" id="rental-total">Rp 0</span>
           </div>
-          <p class="text-secondary text-xs mt-4">* Final price calculated at checkout. Additional options not included in estimate.</p>
+          <p class="text-secondary text-xs mt-4">* Final price calculated at checkout. Proceed to continue.</p>
         </div>
       </div>
     </div>
@@ -121,15 +123,122 @@
   <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
   <script src="js/main.js"></script>
   <script>
-    const carSel = document.getElementById('car-select');
-    const sumCar = document.getElementById('summary-car');
-    if(carSel && sumCar) carSel.addEventListener('change', () => {
-      sumCar.textContent = carSel.options[carSel.selectedIndex].text.split('—')[0].trim() || '—';
-    });
+    const urlParams = new URLSearchParams(window.location.search);
+    const carId = urlParams.get('car_id');
+    const carName = urlParams.get('name');
+    const carPrice = parseInt(urlParams.get('price')) || 0;
+
+    if (!carId || !carName || !carPrice) {
+      alert("Please select a car first.");
+      window.location.href = 'mobil.html';
+    }
+
+    const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+
+    document.getElementById('display-car-name').textContent = carName;
+    document.getElementById('display-car-price').textContent = formatIDR(carPrice) + '/day';
+    document.getElementById('summary-car').textContent = carName;
+
+    const startDateInput = document.getElementById('start-date');
+    const endDateInput = document.getElementById('end-date');
     const pickupInput = document.getElementById('pickup-loc');
-    const sumPickup = document.getElementById('summary-pickup');
-    if(pickupInput && sumPickup) pickupInput.addEventListener('input', () => {
-      sumPickup.textContent = pickupInput.value || '—';
+    const dropoffInput = document.getElementById('dropoff-loc');
+    const notesInput = document.getElementById('notes');
+    const optionsCbs = document.querySelectorAll('.option-cb');
+    
+    // Restore state if coming back from checkout
+    const savedData = JSON.parse(localStorage.getItem('bookingData') || 'null');
+    if (savedData && savedData.carId === carId) {
+      startDateInput.value = savedData.startDate || '';
+      endDateInput.value = savedData.endDate || '';
+      pickupInput.value = savedData.pickupLoc || '';
+      dropoffInput.value = savedData.dropoffLoc || '';
+      notesInput.value = savedData.notes || '';
+      if(savedData.options.driver) document.getElementById('opt-driver').checked = true;
+      if(savedData.options.childseat) document.getElementById('opt-childseat').checked = true;
+      if(savedData.options.gps) document.getElementById('opt-gps').checked = true;
+      if(savedData.options.insurance) document.getElementById('opt-insurance').checked = true;
+    }
+
+    let durationDays = 0;
+    
+    function calculateTotal() {
+      const start = new Date(startDateInput.value);
+      const end = new Date(endDateInput.value);
+      
+      if (startDateInput.value && endDateInput.value && start <= end) {
+        // Calculate difference in days. Same day = 1 day. 
+        const diffTime = Math.abs(end - start);
+        durationDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (durationDays === 0) durationDays = 1;
+      } else {
+        durationDays = 0;
+      }
+
+      document.getElementById('rental-days').textContent = durationDays > 0 ? durationDays + ' days' : '—';
+      document.getElementById('summary-pickup').textContent = pickupInput.value || '—';
+
+      let total = carPrice * durationDays;
+
+      optionsCbs.forEach(cb => {
+        const rowId = cb.id.replace('opt-', '');
+        const row = document.getElementById('row-' + rowId);
+        const valSpan = document.getElementById('val-' + rowId);
+        
+        if (cb.checked && durationDays > 0) {
+          const optTotal = parseInt(cb.dataset.price) * durationDays;
+          total += optTotal;
+          row.classList.remove('hidden');
+          valSpan.textContent = formatIDR(optTotal);
+        } else {
+          row.classList.add('hidden');
+        }
+      });
+
+      document.getElementById('rental-total').textContent = durationDays > 0 ? formatIDR(total) : 'Rp 0';
+      return total;
+    }
+
+    startDateInput.addEventListener('change', calculateTotal);
+    endDateInput.addEventListener('change', calculateTotal);
+    pickupInput.addEventListener('input', calculateTotal);
+    optionsCbs.forEach(cb => cb.addEventListener('change', calculateTotal));
+    
+    // Initial calculation
+    calculateTotal();
+
+    // Handle form submit
+    const form = document.getElementById('rental-form');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      if (durationDays <= 0) {
+        alert("Please enter valid dates.");
+        return;
+      }
+
+      const totalAmount = calculateTotal();
+      const bookingData = {
+        carId,
+        carName,
+        carPrice,
+        startDate: startDateInput.value,
+        endDate: endDateInput.value,
+        durationDays,
+        pickupLoc: pickupInput.value,
+        dropoffLoc: dropoffInput.value,
+        notes: notesInput.value,
+        options: {
+          driver: document.getElementById('opt-driver').checked,
+          childseat: document.getElementById('opt-childseat').checked,
+          gps: document.getElementById('opt-gps').checked,
+          insurance: document.getElementById('opt-insurance').checked
+        },
+        totalAmount
+      };
+      
+      localStorage.setItem('bookingData', JSON.stringify(bookingData));
+      window.location.href = 'checkout.html';
     });
   </script>
 </body>

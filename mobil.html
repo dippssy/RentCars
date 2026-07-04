@@ -105,7 +105,7 @@
               </div>
               <div class="car-card-specs"><span>\u26fd ${v.fuel_type || 'Petrol'}</span><span>\u2699\ufe0f ${v.transmission || 'Automatic'}</span><span>\u2744\ufe0f AC</span></div>
               ${isAvailable
-                ? '<a href="sewa.html" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>'
+                ? `<a href="sewa.html?car_id=${v.id}&name=${encodeURIComponent(v.name)}&price=${v.daily_rate}" class="btn-primary w-full justify-center mt-4 text-sm !py-2.5">Rent This Car</a>`
                 : '<button disabled class="btn-primary w-full justify-center mt-4 text-sm !py-2.5" style="opacity:0.4;cursor:not-allowed;">Currently Rented</button>'
               }
             </div>
