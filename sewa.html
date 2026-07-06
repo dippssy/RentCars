@@ -41,14 +41,26 @@
         <form id="rental-form">
           <div class="glass-strong p-8 mb-6" data-aos="fade-up">
             <h3 class="text-lg font-bold mb-6">1. Rental Details</h3>
-            <div class="mb-6 p-4 rounded-xl border border-glass-border flex items-center justify-between" style="background:var(--accent-subtle);">
-              <div>
+            <div class="mb-6 p-4 rounded-xl flex items-center justify-between" style="background:var(--accent-subtle);">
+              <div id="vehicle-display-container" class="w-full">
                 <p class="text-xs text-text-muted uppercase tracking-wider mb-1">Selected Vehicle</p>
-                <p class="font-semibold text-lg text-white" id="display-car-name">Loading...</p>
-              </div>
-              <div class="text-right">
-                <p class="text-xs text-text-muted uppercase tracking-wider mb-1">Daily Rate</p>
-                <p class="font-bold" style="color:var(--accent);" id="display-car-price">—</p>
+                <div id="pre-selected-car" class="flex justify-between items-center hidden">
+                  <p class="font-semibold text-lg text-white" id="display-car-name">Loading...</p>
+                  <div class="text-right">
+                    <p class="font-bold" style="color:var(--accent);" id="display-car-price">—</p>
+                  </div>
+                </div>
+                <div id="car-selection-div" class="hidden mt-2">
+                  <select id="car-select" class="form-input w-full bg-transparent border-glass-border" style="color:var(--text-primary);">
+                    <option value="" data-price="0" style="color:black;">— Choose a car —</option>
+                    <option value="avanza" data-name="Toyota Avanza" data-price="350000" style="color:black;">Toyota Avanza — Rp 350,000/day</option>
+                    <option value="innova" data-name="Toyota Innova" data-price="500000" style="color:black;">Toyota Innova — Rp 500,000/day</option>
+                    <option value="fortuner" data-name="Toyota Fortuner" data-price="850000" style="color:black;">Toyota Fortuner — Rp 850,000/day</option>
+                    <option value="pajero" data-name="Pajero Sport" data-price="900000" style="color:black;">Pajero Sport — Rp 900,000/day</option>
+                    <option value="alphard" data-name="Toyota Alphard" data-price="1500000" style="color:black;">Toyota Alphard — Rp 1,500,000/day</option>
+                    <option value="hiace" data-name="Toyota HiAce" data-price="1200000" style="color:black;">Toyota HiAce — Rp 1,200,000/day</option>
+                  </select>
+                </div>
               </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -123,21 +135,35 @@
   <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
   <script src="js/main.js"></script>
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const carId = urlParams.get('car_id');
-    const carName = urlParams.get('name');
-    const carPrice = parseInt(urlParams.get('price')) || 0;
-
-    if (!carId || !carName || !carPrice) {
-      alert("Please select a car first.");
-      window.location.href = 'mobil.html';
-    }
-
     const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
 
-    document.getElementById('display-car-name').textContent = carName;
-    document.getElementById('display-car-price').textContent = formatIDR(carPrice) + '/day';
-    document.getElementById('summary-car').textContent = carName;
+    const urlParams = new URLSearchParams(window.location.search);
+    let carId = urlParams.get('car_id');
+    let carName = urlParams.get('name');
+    let carPrice = parseInt(urlParams.get('price')) || 0;
+
+    const preSelectedDiv = document.getElementById('pre-selected-car');
+    const carSelectionDiv = document.getElementById('car-selection-div');
+    const carSelect = document.getElementById('car-select');
+
+    if (carId && carName && carPrice) {
+      preSelectedDiv.classList.remove('hidden');
+      document.getElementById('display-car-name').textContent = carName;
+      document.getElementById('display-car-price').textContent = formatIDR(carPrice) + '/day';
+      document.getElementById('summary-car').textContent = carName;
+    } else {
+      carSelectionDiv.classList.remove('hidden');
+      document.getElementById('summary-car').textContent = '—';
+      
+      carSelect.addEventListener('change', (e) => {
+        const option = e.target.options[e.target.selectedIndex];
+        carId = option.value;
+        carName = option.dataset.name || '';
+        carPrice = parseInt(option.dataset.price) || 0;
+        document.getElementById('summary-car').textContent = carName || '—';
+        calculateTotal();
+      });
+    }
 
     const startDateInput = document.getElementById('start-date');
     const endDateInput = document.getElementById('end-date');
@@ -149,6 +175,23 @@
     // Restore state if coming back from checkout
     const savedData = JSON.parse(localStorage.getItem('bookingData') || 'null');
     if (savedData && savedData.carId === carId) {
+      startDateInput.value = savedData.startDate || '';
+      endDateInput.value = savedData.endDate || '';
+      pickupInput.value = savedData.pickupLoc || '';
+      dropoffInput.value = savedData.dropoffLoc || '';
+      notesInput.value = savedData.notes || '';
+      if(savedData.options.driver) document.getElementById('opt-driver').checked = true;
+      if(savedData.options.childseat) document.getElementById('opt-childseat').checked = true;
+      if(savedData.options.gps) document.getElementById('opt-gps').checked = true;
+      if(savedData.options.insurance) document.getElementById('opt-insurance').checked = true;
+    } else if (savedData && !carId) {
+      // If returning to the form and no url param, restore the select value
+      carSelect.value = savedData.carId;
+      carId = savedData.carId;
+      carName = savedData.carName;
+      carPrice = savedData.carPrice;
+      document.getElementById('summary-car').textContent = carName || '—';
+      
       startDateInput.value = savedData.startDate || '';
       endDateInput.value = savedData.endDate || '';
       pickupInput.value = savedData.pickupLoc || '';
@@ -211,6 +254,11 @@
     const form = document.getElementById('rental-form');
     form.addEventListener('submit', (e) => {
       e.preventDefault();
+      
+      if (!carId || !carName || carPrice <= 0) {
+        alert("Please select a vehicle first.");
+        return;
+      }
       
       if (durationDays <= 0) {
         alert("Please enter valid dates.");
