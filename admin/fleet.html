@@ -357,7 +357,7 @@
         return;
       }
       let html = '';
-        vehicles.forEach(car => {
+        vehiclesToRender.forEach(car => {
           let imageDisplay = car.image_url 
             ? `<img src="${car.image_url}" alt="${car.name}" class="w-10 h-10 rounded-lg object-cover cursor-pointer hover:opacity-80 transition" onclick="openLightbox('${car.image_url}')">`
             : `<div class="w-10 h-10 rounded-lg bg-[#252833] flex items-center justify-center text-xl">${car.image_emoji || '🚘'}</div>`;

@@ -314,7 +314,7 @@
         }
 
         let html = '';
-        bookings.forEach(b => {
+        bookingsToRender.forEach(b => {
           const custName = b.customers ? b.customers.full_name : "Unknown Customer";
           const custEmail = (b.customers && b.customers.email) ? b.customers.email : "—";
           const custPhone = (b.customers && b.customers.phone) ? b.customers.phone : "—";
