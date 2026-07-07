@@ -107,7 +107,7 @@
       <button id="mobile-menu-btn" class="md:hidden text-text-muted hover:text-white p-1">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
       </button>
-      <div class="flex-1 max-w-xl ml-3 md:ml-0"><div class="relative"><span class="absolute inset-y-0 left-0 pl-3 flex items-center"><svg class="h-4 w-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></span><input class="block w-full bg-[#161b22] border-none text-sm rounded-full pl-10 pr-4 py-2 text-white" placeholder="Search bookings..." type="text"/></div></div>
+      <div class="flex-1 max-w-xl ml-3 md:ml-0"><div class="relative"><span class="absolute inset-y-0 left-0 pl-3 flex items-center"><svg class="h-4 w-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></span><input id="search-input" class="block w-full bg-[#161b22] border-none text-sm rounded-full pl-10 pr-4 py-2 text-white" placeholder="Search bookings..." type="text"/></div></div>
       <div class="flex items-center gap-6 ml-4"><div class="flex items-center gap-2 cursor-pointer group"><span class="text-sm font-medium">Admin Mode</span></div></div>
     </header>
 
@@ -120,8 +120,8 @@
       </div>
 
       <div class="flex gap-4 mb-6 overflow-x-auto pb-2">
-        <select class="bg-card-dark border border-border-gray text-sm rounded-lg text-white px-4 py-2 flex-shrink-0"><option>All Status</option><option>Active</option><option>Pending</option><option>Completed</option><option>Cancelled</option></select>
-        <select class="bg-card-dark border border-border-gray text-sm rounded-lg text-white px-4 py-2 flex-shrink-0"><option>Any Date</option><option>Today</option><option>This Week</option><option>This Month</option></select>
+        <select id="filter-status" class="bg-card-dark border border-border-gray text-sm rounded-lg text-white px-4 py-2 flex-shrink-0"><option>All Status</option><option>Active</option><option>Pending</option><option>Completed</option><option>Cancelled</option></select>
+        <select id="filter-date" class="bg-card-dark border border-border-gray text-sm rounded-lg text-white px-4 py-2 flex-shrink-0"><option>Any Date</option><option>Today</option><option>This Week</option><option>This Month</option></select>
       </div>
 
       <div class="bg-card-dark rounded-2xl card-border overflow-hidden">
@@ -300,9 +300,16 @@
         if (error) throw error;
         
         allBookings = bookings;
+        applyFilters();
+      } catch (err) {
+        document.getElementById('bookings-table-body').innerHTML = `<tr><td colspan="8" class="px-6 py-8 text-center text-red-400">Error: ${err.message}</td></tr>`;
+      }
+    }
 
-        if (!bookings || bookings.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-text-muted">No bookings found in database.</td></tr>`;
+    function renderBookings(bookingsToRender) {
+        const tbody = document.getElementById('bookings-table-body');
+        if (!bookingsToRender || bookingsToRender.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-8 text-center text-text-muted">No bookings found.</td></tr>`;
           return;
         }
 
@@ -354,9 +361,50 @@
           `;
         });
         tbody.innerHTML = html;
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-red-400">Error: ${err.message}</td></tr>`;
+    }
+
+    function applyFilters() {
+      const search = (document.getElementById('search-input').value || '').toLowerCase();
+      const status = document.getElementById('filter-status').value;
+      const dateFilter = document.getElementById('filter-date').value;
+
+      let filtered = allBookings;
+
+      if (search) {
+        filtered = filtered.filter(b => {
+          const custName = b.customers ? b.customers.full_name.toLowerCase() : '';
+          const vehName = b.vehicles ? b.vehicles.name.toLowerCase() : '';
+          const ref = b.booking_ref.toLowerCase();
+          return ref.includes(search) || custName.includes(search) || vehName.includes(search);
+        });
       }
+
+      if (status !== 'All Status') {
+        filtered = filtered.filter(b => b.status === status);
+      }
+
+      if (dateFilter !== 'Any Date') {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        
+        filtered = filtered.filter(b => {
+          const bDate = new Date(b.created_at || b.start_date);
+          bDate.setHours(0,0,0,0);
+          
+          if (dateFilter === 'Today') {
+              return bDate.getTime() === today.getTime();
+          } else if (dateFilter === 'This Week') {
+              const diffTime = Math.abs(today - bDate);
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+              return diffDays <= 7;
+          } else if (dateFilter === 'This Month') {
+              return bDate.getMonth() === today.getMonth() && bDate.getFullYear() === today.getFullYear();
+          }
+          return true;
+        });
+      }
+
+      renderBookings(filtered);
     }
 
     // Delete Logic
@@ -596,6 +644,11 @@
         } catch (error) { alert("Error adding booking: " + error.message); } 
         finally { btn.innerHTML = originalText; btn.disabled = false; }
       });
+
+      // Filter event listeners
+      document.getElementById('search-input').addEventListener('input', applyFilters);
+      document.getElementById('filter-status').addEventListener('change', applyFilters);
+      document.getElementById('filter-date').addEventListener('change', applyFilters);
     });
   </script>
 </body>

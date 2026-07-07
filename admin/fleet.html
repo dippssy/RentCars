@@ -112,7 +112,7 @@
       <button id="mobile-menu-btn" class="md:hidden text-text-muted hover:text-white p-1">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
       </button>
-      <div class="flex-1 max-w-xl ml-3 md:ml-0"><div class="relative"><span class="absolute inset-y-0 left-0 pl-3 flex items-center"><svg class="h-4 w-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></span><input class="block w-full bg-[#161b22] border-none text-sm rounded-full pl-10 pr-4 py-2 text-white" placeholder="Search fleet..." type="text"/></div></div>
+      <div class="flex-1 max-w-xl ml-3 md:ml-0"><div class="relative"><span class="absolute inset-y-0 left-0 pl-3 flex items-center"><svg class="h-4 w-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></span><input id="search-input" class="block w-full bg-[#161b22] border-none text-sm rounded-full pl-10 pr-4 py-2 text-white" placeholder="Search fleet..." type="text"/></div></div>
       <div class="flex items-center gap-6 ml-4"><div class="flex items-center gap-2 cursor-pointer group"><span class="text-sm font-medium">Admin Mode</span></div></div>
     </header>
 
@@ -341,11 +341,22 @@
         document.getElementById('stat-maint').textContent = vehicles.filter(v => v.status === 'Maintenance').length;
 
         if (!vehicles || vehicles.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-text-muted">No vehicles found.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-text-muted">No vehicles found in database.</td></tr>`;
           return;
         }
+        applyFilters();
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-400">Error: ${err.message}</td></tr>`;
+      }
+    }
 
-        let html = '';
+    function renderVehicles(vehiclesToRender) {
+      const tbody = document.getElementById('fleet-table-body');
+      if (!vehiclesToRender || vehiclesToRender.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-text-muted">No vehicles found.</td></tr>`;
+        return;
+      }
+      let html = '';
         vehicles.forEach(car => {
           let imageDisplay = car.image_url 
             ? `<img src="${car.image_url}" alt="${car.name}" class="w-10 h-10 rounded-lg object-cover cursor-pointer hover:opacity-80 transition" onclick="openLightbox('${car.image_url}')">`
@@ -372,9 +383,20 @@
           `;
         });
         tbody.innerHTML = html;
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-400">Error: ${err.message}</td></tr>`;
+    }
+
+    function applyFilters() {
+      const search = (document.getElementById('search-input').value || '').toLowerCase();
+      
+      let filtered = allVehicles;
+      if (search) {
+        filtered = filtered.filter(v => {
+          return (v.name && v.name.toLowerCase().includes(search)) || 
+                 (v.license_plate && v.license_plate.toLowerCase().includes(search)) || 
+                 (v.category && v.category.toLowerCase().includes(search));
+        });
       }
+      renderVehicles(filtered);
     }
 
     // Delete Logic
@@ -453,6 +475,11 @@
       loadVehicles();
       const addModal = document.getElementById('modal-add-vehicle');
       document.getElementById('btn-add-vehicle').addEventListener('click', () => addModal.classList.remove('hidden'));
+      document.getElementById('btn-close-lightbox').addEventListener('click', closeLightbox);
+      
+      // Filter listener
+      document.getElementById('search-input').addEventListener('input', applyFilters);
+
       document.getElementById('btn-close-vehicle').addEventListener('click', () => addModal.classList.add('hidden'));
       document.getElementById('btn-cancel-vehicle').addEventListener('click', () => addModal.classList.add('hidden'));
       document.getElementById('modal-add-vehicle-bg').addEventListener('click', () => addModal.classList.add('hidden'));

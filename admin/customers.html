@@ -103,7 +103,7 @@
       <button id="mobile-menu-btn" class="md:hidden text-text-muted hover:text-white p-1">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
       </button>
-      <div class="flex-1 max-w-xl ml-3 md:ml-0"><div class="relative"><span class="absolute inset-y-0 left-0 pl-3 flex items-center"><svg class="h-4 w-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></span><input class="block w-full bg-[#161b22] border-none text-sm rounded-full pl-10 pr-4 py-2 text-white" placeholder="Search customers..." type="text"/></div></div>
+      <div class="flex-1 max-w-xl ml-3 md:ml-0"><div class="relative"><span class="absolute inset-y-0 left-0 pl-3 flex items-center"><svg class="h-4 w-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></span><input id="search-input" class="block w-full bg-[#161b22] border-none text-sm rounded-full pl-10 pr-4 py-2 text-white" placeholder="Search customers..." type="text"/></div></div>
       <div class="flex items-center gap-6 ml-4"><div class="flex items-center gap-2 cursor-pointer group"><span class="text-sm font-medium">Admin Mode</span></div></div>
     </header>
 
@@ -250,6 +250,7 @@
     };
 
     let allCustomers = [];
+    let allBookingsData = [];
 
     async function loadCustomers() {
       const tbody = document.getElementById('customers-table-body');
@@ -259,6 +260,7 @@
         if (error) throw error;
         
         const { data: bookingsData } = await supabaseClient.from('bookings').select('customer_id, total_amount, status');
+        allBookingsData = bookingsData || [];
         
         allCustomers = customers;
 
@@ -267,14 +269,27 @@
           return;
         }
 
+        applyFilters();
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-400">Error: ${err.message}</td></tr>`;
+      }
+    }
+
+    function renderCustomers(customersToRender) {
+        const tbody = document.getElementById('customers-table-body');
+        if (!customersToRender || customersToRender.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-text-muted">No customers found.</td></tr>`;
+          return;
+        }
+        
         let html = '';
-        customers.forEach(c => {
+        customersToRender.forEach(c => {
           // Calculate dynamic totals based on actual bookings
           let realRentals = 0;
           let realSpent = 0;
           
-          if (bookingsData) {
-             const custBookings = bookingsData.filter(b => b.customer_id === c.id);
+          if (allBookingsData && allBookingsData.length > 0) {
+             const custBookings = allBookingsData.filter(b => b.customer_id === c.id);
              realRentals = custBookings.length;
              realSpent = custBookings.reduce((sum, b) => sum + (Number(b.total_amount) || 0), 0);
           }
@@ -307,9 +322,20 @@
           `;
         });
         tbody.innerHTML = html;
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-400">Error: ${err.message}</td></tr>`;
+    }
+
+    function applyFilters() {
+      const search = (document.getElementById('search-input').value || '').toLowerCase();
+      
+      let filtered = allCustomers;
+      if (search) {
+        filtered = filtered.filter(c => {
+          return (c.full_name && c.full_name.toLowerCase().includes(search)) || 
+                 (c.email && c.email.toLowerCase().includes(search)) || 
+                 (c.phone && c.phone.toLowerCase().includes(search));
+        });
       }
+      renderCustomers(filtered);
     }
 
     // Delete Logic
@@ -409,8 +435,14 @@
           addModal.classList.add('hidden');
           loadCustomers();
         } catch (error) { alert("Error: " + error.message); } 
-        finally { btn.innerHTML = originalText; btn.disabled = false; }
+        finally { 
+          btn.innerHTML = originalText; 
+          btn.disabled = false; 
+        }
       });
+      
+      // Filter event listener
+      document.getElementById('search-input').addEventListener('input', applyFilters);
     });
   </script>
 </body>
