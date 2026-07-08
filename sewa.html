@@ -7,6 +7,8 @@
   <title>Rent a Car — LUXDRIVE</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -64,8 +66,8 @@
               </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="form-group"><label class="form-label" for="start-date">Pickup Date</label><input type="date" id="start-date" class="form-input" required></div>
-              <div class="form-group"><label class="form-label" for="end-date">Return Date</label><input type="date" id="end-date" class="form-input" required></div>
+              <div class="form-group"><label class="form-label" for="start-date">Pickup Date</label><input type="text" id="start-date" class="form-input" placeholder="Select Pickup Date" required></div>
+              <div class="form-group"><label class="form-label" for="end-date">Return Date</label><input type="text" id="end-date" class="form-input" placeholder="Select Return Date" required></div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="form-group"><label class="form-label" for="pickup-loc">Pickup Location</label><input type="text" id="pickup-loc" class="form-input" placeholder="e.g., Airport, Hotel address" required></div>
@@ -133,6 +135,9 @@
   </footer>
 
   <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
   <script src="js/main.js"></script>
   <script>
     const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
@@ -162,7 +167,53 @@
         carPrice = parseInt(option.dataset.price) || 0;
         document.getElementById('summary-car').textContent = carName || '—';
         calculateTotal();
+        initCalendars();
       });
+    }
+
+    let startPicker = null;
+    let endPicker = null;
+
+    async function fetchBookedDates(vehicleId) {
+      if (!vehicleId || typeof supabaseClient === 'undefined') return [];
+      try {
+        const { data, error } = await supabaseClient
+          .from('bookings')
+          .select('start_date, end_date')
+          .eq('vehicle_id', vehicleId)
+          .in('status', ['Active', 'Pending']);
+          
+        if (error) throw error;
+        
+        return (data || []).map(b => ({
+          from: b.start_date,
+          to: b.end_date
+        }));
+      } catch (err) {
+        console.error("Error fetching bookings:", err);
+        return [];
+      }
+    }
+
+    async function initCalendars() {
+      const disabledRanges = await fetchBookedDates(carId);
+      
+      const config = {
+        minDate: "today",
+        disable: disabledRanges,
+        onChange: function() {
+          calculateTotal();
+        }
+      };
+
+      if (startPicker) startPicker.destroy();
+      if (endPicker) endPicker.destroy();
+
+      startPicker = flatpickr("#start-date", config);
+      endPicker = flatpickr("#end-date", config);
+      
+      if (startDateInput.value) startPicker.setDate(startDateInput.value);
+      if (endDateInput.value) endPicker.setDate(endDateInput.value);
     }
 
     const startDateInput = document.getElementById('start-date');
@@ -249,6 +300,7 @@
     
     // Initial calculation
     calculateTotal();
+    initCalendars();
 
     // Handle form submit
     const form = document.getElementById('rental-form');
