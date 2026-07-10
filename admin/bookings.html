@@ -145,6 +145,26 @@
           </table>
         </div>
       </div>
+      
+      <!-- Pagination Controls -->
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4 text-sm text-text-muted">
+        <div class="flex items-center gap-2">
+          <span>Rows per page:</span>
+          <select id="items-per-page" class="bg-card-dark border border-border-gray rounded px-2 py-1 text-white text-xs">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="All">All</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-4">
+          <span id="pagination-info">Showing 0 to 0 of 0 entries</span>
+          <div class="flex gap-1">
+            <button id="btn-prev-page" class="px-3 py-1 bg-card-dark border border-border-gray rounded hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Prev</button>
+            <button id="btn-next-page" class="px-3 py-1 bg-card-dark border border-border-gray rounded hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+          </div>
+        </div>
+      </div>
     </div>
     
     <!-- New Booking Modal -->
@@ -291,6 +311,9 @@
     };
 
     let allBookings = [];
+    let currentFilteredBookings = [];
+    let currentPage = 1;
+    let itemsPerPage = 10;
 
     async function loadBookings() {
       const tbody = document.getElementById('bookings-table-body');
@@ -306,8 +329,24 @@
       }
     }
 
-    function renderBookings(bookingsToRender) {
+    function renderBookings() {
         const tbody = document.getElementById('bookings-table-body');
+        
+        let limit = itemsPerPage === 'All' ? currentFilteredBookings.length : parseInt(itemsPerPage);
+        let totalItems = currentFilteredBookings.length;
+        let totalPages = limit > 0 ? Math.ceil(totalItems / limit) : 1;
+        
+        if (currentPage > totalPages) currentPage = totalPages || 1;
+        
+        let startIdx = (currentPage - 1) * limit;
+        let endIdx = itemsPerPage === 'All' ? totalItems : Math.min(startIdx + limit, totalItems);
+        
+        const bookingsToRender = currentFilteredBookings.slice(startIdx, endIdx);
+        
+        document.getElementById('pagination-info').textContent = `Showing ${totalItems === 0 ? 0 : startIdx + 1} to ${endIdx} of ${totalItems} entries`;
+        document.getElementById('btn-prev-page').disabled = currentPage === 1;
+        document.getElementById('btn-next-page').disabled = currentPage === totalPages || totalPages === 0;
+
         if (!bookingsToRender || bookingsToRender.length === 0) {
           tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-8 text-center text-text-muted">No bookings found.</td></tr>`;
           return;
@@ -404,7 +443,9 @@
         });
       }
 
-      renderBookings(filtered);
+      currentFilteredBookings = filtered;
+      currentPage = 1;
+      renderBookings();
     }
 
     // Delete Logic
@@ -649,6 +690,21 @@
       document.getElementById('search-input').addEventListener('input', applyFilters);
       document.getElementById('filter-status').addEventListener('change', applyFilters);
       document.getElementById('filter-date').addEventListener('change', applyFilters);
+
+      // Pagination event listeners
+      document.getElementById('items-per-page').addEventListener('change', (e) => {
+        itemsPerPage = e.target.value;
+        currentPage = 1;
+        renderBookings();
+      });
+      document.getElementById('btn-prev-page').addEventListener('click', () => {
+        if (currentPage > 1) { currentPage--; renderBookings(); }
+      });
+      document.getElementById('btn-next-page').addEventListener('click', () => {
+        let limit = itemsPerPage === 'All' ? currentFilteredBookings.length : parseInt(itemsPerPage);
+        let totalPages = Math.ceil(currentFilteredBookings.length / limit);
+        if (currentPage < totalPages) { currentPage++; renderBookings(); }
+      });
     });
   </script>
 </body>
