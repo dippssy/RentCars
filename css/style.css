@@ -854,21 +854,21 @@ select.form-input {
 [data-theme="light"] .parallax-overlay {
   background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.65) 50%, var(--bg-primary) 100%);
 }
-[data-theme="light"] .navbar:not(.scrolled) .nav-link,
-[data-theme="light"] .navbar:not(.scrolled) .nav-link.active-link {
+[data-theme="light"] .home-page .navbar:not(.scrolled) .nav-link,
+[data-theme="light"] .home-page .navbar:not(.scrolled) .nav-link.active-link {
   color: rgba(255,255,255,0.7);
 }
-[data-theme="light"] .navbar:not(.scrolled) .nav-link:hover,
-[data-theme="light"] .navbar:not(.scrolled) .nav-link.active-link {
+[data-theme="light"] .home-page .navbar:not(.scrolled) .nav-link:hover,
+[data-theme="light"] .home-page .navbar:not(.scrolled) .nav-link.active-link {
   color: #ffffff;
 }
-[data-theme="light"] .navbar:not(.scrolled) {
+[data-theme="light"] .home-page .navbar:not(.scrolled) {
   color: #ffffff;
 }
-[data-theme="light"] .navbar:not(.scrolled) a[href="index.html"] {
+[data-theme="light"] .home-page .navbar:not(.scrolled) a[href="index.html"] {
   color: #ffffff;
 }
-[data-theme="light"] .navbar:not(.scrolled) .theme-toggle {
+[data-theme="light"] .home-page .navbar:not(.scrolled) .theme-toggle {
   color: #ffffff;
   border-color: rgba(255,255,255,0.2);
 }
